@@ -1,0 +1,416 @@
+# 3D UMAP plots of seurat v3.0.0-v3.1.1 objects utilizing the visualization 
+# package plot_ly
+
+# R v3.5.3 (x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
+
+# Seurat is a multimodal single Cell RNA seq analysis algorithm created by
+# The Satija Lab. For more information please see: https://satijalab.org/seurat/
+
+# Contributors (by their Github handles):
+# @Dragonmasterx87 (Dept. of Cell Biology, UM)
+# @msaadsadiq (Dept. of Electrical and Computer Engineering, UM)
+
+# Install plot_ly
+install.packages('plotly')
+
+# Load plot_ly
+library(plotly)
+
+# Construct a dataframe using data from your pre-clustered Seurat v3.1.1 object
+# Here 'seurat_clusters' is list of numeric cluster identities, you can find it here: DiabetesST2UMAP3d.combined[["seurat_cluster"]], 
+# or DiabetesST2UMAP3d.combined$seurat_clusters, where 'DiabetesST2UMAP3d.combined' is a Seurat object created with Seurat v3.1.1 (works for v3.0.0 as well)
+DiabetesST2UMAP.combined <- "integrated"
+
+# Re-run UMAPs that you have accurate calculations for all UMAP(s)
+DiabetesST2UMAP3d.combined <- RunUMAP(DiabetesST2UMAP.combined_AD,
+                                      dims = 1:10,
+                                      n.components = 3L)
+
+# Extract tSNE information from Seurat Object
+umap_1 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,1]
+umap_2 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,2]
+umap_3 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,3]
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Embeddings(object = DiabetesST2UMAP3d.combined, reduction = "umap")
+
+# Prepare a dataframe for cell plotting
+plotting.data <- FetchData(object = DiabetesST2UMAP3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "CellType", "Islets_Island", "groups", "integrated_snn_res.0.2"))
+
+plotting.data1 <- FetchData(object = DiabetesST2UMAP3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3"))
+
+# Make a column of row name identities (these will be your cell/barcode names)
+plotting.data$label <- paste(rownames(plotting.data))
+
+plotting.data1$label <- paste(rownames(plotting.data1))
+
+write.csv(plotting.data1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/umap_coords.csv')
+
+plotting.data$CellType <- Idents(DiabetesST2UMAP.combined)
+head(x = plotting.data[[]])
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+plot_ly(data = plotting.data, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~integrated_snn_res.0.2, 
+        colors = c("turquoise1","mediumseagreen",
+                   "royalblue1","lightslateblue",
+                   "darkturquoise","navyblue", "darkcyan",
+                   "lightgoldenrod2","sienna3",
+                   "sienna","greenyellow",
+                   "yellow","gold3",
+                   "grey",
+                   "pink",
+                   "red",
+                   "palegreen2"),
+        type = "scatter3d", 
+        mode = "markers", 
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #When you visualize your plotly object, hovering your mouse pointer over a point shows cell names
+
+
+
+plot_ly(data = plotting.data, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~Islets_Island, 
+        colors = c("green","red", "blue"
+                   ),
+        type = "scatter3d", 
+        mode = "markers", 
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text")
+# Say you wanto make a gene-expression 3D plot, where you can plot gene expression against a color scale
+# Here using the same seurat object as above, we extract gene expression information for beta-actin 'ACTB'
+# Here we concentrate on SCT normalized data, or log normalized RNA NOT raw counts.
+# In addition if you want, you may look at normalised-RNA, SCT or integrated slots, to look at gene expression
+# Setting your DefaultAssay() will inform R which assay to pick up expression data from.
+DefaultAssay(object = pancreas.integrated)
+DefaultAssay(object = pancreas.integrated) <- "RNA"
+DefaultAssay(object = pancreas.integrated) <- "integrated"
+DefaultAssay(object = pancreas.integrated) <- "SCT"
+
+# create a dataframe
+plotting.data <- FetchData(object = DiabetesST2UMAP3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "ACTB"), slot = 'data')
+
+# Say you want change the scale, so that every cell having an expression >1 will be one color
+# Basically, you are re-adjusting the scale here, so that any cell having a certain expression will light up on your 3D plot
+
+# First make another column in your dataframe, where all values above 1 are re-assigned a value of 1
+# This information is stored in the 'changed' column of your dataframe
+plotting.data$changed <- ifelse(test = plotting.data$ACTB <1, yes = plotting.data$ACTB, no = 1)
+
+# Add the label column, so that now the column has 'cellname-its expression value'
+plotting.data$label <- paste(rownames(plotting.data)," - ", plotting.data$ACTB, sep="")
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20), and cells express a gene called ACTB
+plot_ly(data = plotting.data, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~changed, # you can just run this against the column for the gene as well using ~ACTB, the algorith will automatically scale in that case based on maximal and minimal values
+        opacity = .5,
+        colors = c('darkgreen', 'red'), 
+        type = "scatter3d", 
+        mode = "markers",
+        marker = list(size = 5, width=2), 
+        text=~label,
+        hoverinfo="text"
+)
+
+# On running this code the HTML output should appear in RStudio. You can save the output as a
+# HTML file. Once you have saved, just open the HTML file in any web browser (double click on the html- file
+# and if asked select to open with any web browser like google chrome/safari/mozilla/explorer etc).
+# It should be have all of the integrated features you saw in the RStudio output file.
+
+# Thank you for reading and using this code to further your scRNAseq analysis!
+# If you liked it, dont forget to acknowledge, fork and star!
+# Citation information is within the Readme, please dont forget to cite!
+# Have a wonderful day!!
+
+
+# Run plot3d and while the rgl widget is open run the code below to generate a html file in the plots panel of RStudio
+# You can save as a html file via export. These files work with optimal resolution and are most user friendly in Google Chrome 
+
+rgl::rglwidget() #save as html
+DiabetesST2UMAP3d.combined$barcode <- colnames(DiabetesST2UMAP3d.combined)
+DiabetesST2UMAP3d.combined$UMAP_1 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,1]
+DiabetesST2UMAP3d.combined$umap_2 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,2]
+DiabetesST2UMAP3d.combined$umap_3 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,3]
+write.csv(DiabetesST2UMAP3d.combined@meta.data, file='metadata.csv', quote=F, row.names=F)
+
+DefaultAssay(object = DiabetesST2UMAP3d.combined) <- "RNA"
+DiabetesST2UMAP3d.combined <- NormalizeData(DiabetesST2UMAP3d.combined)
+DiabetesST2UMAP3d.combined <- SCTransform(DiabetesST2UMAP3d.combined, assay = "RNA", new.assay.name = "SCT", verbose = TRUE, return.only.var.genes = TRUE)
+
+
+out_data_dir="C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW"
+# write expression counts matrix
+library(Matrix)
+counts_matrix <- GetAssayData(DiabetesST2UMAP3d.combined, assay='RNA', slot='counts')
+writeMM(counts_matrix, file=paste0(out_data_dir, 'counts.mtx'))
+
+# write dimesnionality reduction matrix, in this example case pca matrix
+write.csv(DiabetesST2UMAP3d.combined@reductions$pca@cell.embeddings, file='pca.csv', quote=F,row.names=F)
+
+# write gene names
+write.table(
+  data.frame('gene'=rownames(counts_matrix)),file='gene_names.csv', quote=F,row.names=F,col.names=F)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  # BMP7- ST2+ST3
+  
+  # Interacive multimodal 3D UMAP plotting of scRNA sequencing datasets
+  # The following is a length of code generated to create nice 
+  # 3D UMAP plots of seurat v3.0.0-v3.1.1 objects utilizing the visualization 
+  # package plot_ly
+  
+  # R v3.5.3 (x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
+  
+  # Seurat is a multimodal single Cell RNA seq analysis algorithm created by
+# The Satija Lab. For more information please see: https://satijalab.org/seurat/
+
+# Contributors (by their Github handles):
+# @Dragonmasterx87 (Dept. of Cell Biology, UM)
+# @msaadsadiq (Dept. of Electrical and Computer Engineering, UM)
+
+# Install plot_ly
+install.packages('plotly')
+
+# Load plot_ly
+library(plotly)
+
+# Construct a dataframe using data from your pre-clustered Seurat v3.1.1 object
+# Here 'seurat_clusters' is list of numeric cluster identities, you can find it here: BMPcomparison3d.combined[["seurat_cluster"]], 
+# or BMPcomparison3d.combined$seurat_clusters, where 'BMPcomparison3d.combined' is a Seurat object created with Seurat v3.1.1 (works for v3.0.0 as well)
+BMPcomparison.combinedUMAP2<- "integrated"
+
+# Re-run UMAPs that you have accurate calculations for all UMAP(s)
+BMPcomparison3d.combined <- RunUMAP(BMPcomparison.combinedUMAP2,
+                                    dims = 1:10,
+                                    n.components = 3L)
+
+# Extract tSNE information from Seurat Object
+umap_1 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,1]
+umap_2 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,2]
+umap_3 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,3]
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Embeddings(object = BMPcomparison3d.combined, reduction = "umap")
+
+# Prepare a dataframe for cell plotting
+plotting.data2 <- FetchData(object = BMPcomparison3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "seurat_clusters"))
+
+plotting.data3 <- FetchData(object = BMPcomparison3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3"))
+
+# Make a column of row name identities (these will be your cell/barcode names)
+plotting.data2$label <- paste(rownames(plotting.data2))
+
+plotting.data3$label <- paste(rownames(plotting.data3))
+
+write.csv(plotting.data2, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/umap_coords1.csv')
+
+plotting.data2$CellType <- Idents(BMPcomparison.combinedUMAP2)
+head(x = plotting.data2[[]])
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+plot_ly(data = plotting.data2, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~CellType, 
+        colors = c("turquoise1",
+                   "mediumseagreen",
+                   "royalblue1",
+                   "lightslateblue",
+                   "lightgoldenrod2",
+                   "sienna3",
+                   "yellow3",
+                   "CORAL2",
+                   "YELLOW",
+                   "GOLD3",
+                   "pink", "red","palegreen2","grey"),
+        type = "scatter3d", 
+        mode = "markers", 
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #When you visualize your plotly object, hovering your mouse pointer over a point shows cell names
+
+# Say you wanto make a gene-expression 3D plot, where you can plot gene expression against a color scale
+# Here using the same seurat object as above, we extract gene expression information for beta-actin 'ACTB'
+# Here we concentrate on SCT normalized data, or log normalized RNA NOT raw counts.
+# In addition if you want, you may look at normalised-RNA, SCT or integrated slots, to look at gene expression
+# Setting your DefaultAssay() will inform R which assay to pick up expression data from.
+DefaultAssay(object = pancreas.integrated)
+DefaultAssay(object = pancreas.integrated) <- "RNA"
+DefaultAssay(object = pancreas.integrated) <- "integrated"
+DefaultAssay(object = pancreas.integrated) <- "SCT"
+
+# create a dataframe
+plotting.data <- FetchData(object = BMPcomparison3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "ACTB"), slot = 'data')
+
+# Say you want change the scale, so that every cell having an expression >1 will be one color
+# Basically, you are re-adjusting the scale here, so that any cell having a certain expression will light up on your 3D plot
+
+# First make another column in your dataframe, where all values above 1 are re-assigned a value of 1
+# This information is stored in the 'changed' column of your dataframe
+plotting.data$changed <- ifelse(test = plotting.data$ACTB <1, yes = plotting.data$ACTB, no = 1)
+
+# Add the label column, so that now the column has 'cellname-its expression value'
+plotting.data$label <- paste(rownames(plotting.data)," - ", plotting.data$ACTB, sep="")
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20), and cells express a gene called ACTB
+plot_ly(data = plotting.data, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~changed, # you can just run this against the column for the gene as well using ~ACTB, the algorith will automatically scale in that case based on maximal and minimal values
+        opacity = .5,
+        colors = c('darkgreen', 'red'), 
+        type = "scatter3d", 
+        mode = "markers",
+        marker = list(size = 5, width=2), 
+        text=~label,
+        hoverinfo="text"
+)
+
+# On running this code the HTML output should appear in RStudio. You can save the output as a
+# HTML file. Once you have saved, just open the HTML file in any web browser (double click on the html- file
+# and if asked select to open with any web browser like google chrome/safari/mozilla/explorer etc).
+# It should be have all of the integrated features you saw in the RStudio output file.
+
+# Thank you for reading and using this code to further your scRNAseq analysis!
+# If you liked it, dont forget to acknowledge, fork and star!
+# Citation information is within the Readme, please dont forget to cite!
+# Have a wonderful day!!
+
+
+# Run plot3d and while the rgl widget is open run the code below to generate a html file in the plots panel of RStudio
+# You can save as a html file via export. These files work with optimal resolution and are most user friendly in Google Chrome 
+
+rgl::rglwidget() #save as html
+BMPcomparison3d.combined$barcode <- colnames(BMPcomparison3d.combined)
+BMPcomparison3d.combined$UMAP_1 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,1]
+BMPcomparison3d.combined$umap_2 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,2]
+BMPcomparison3d.combined$umap_3 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,3]
+write.csv(BMPcomparison3d.combined@meta.data, file='metadata.csv', quote=F, row.names=F)
+
+DefaultAssay(object = BMPcomparison3d.combined) <- "RNA"
+BMPcomparison3d.combined <- NormalizeData(BMPcomparison3d.combined)
+BMPcomparison3d.combined <- SCTransform(BMPcomparison3d.combined, assay = "RNA", new.assay.name = "SCT", verbose = TRUE, return.only.var.genes = TRUE)
+
+
+out_data_dir="C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW"
+# write expression counts matrix
+library(Matrix)
+counts_matrix <- GetAssayData(BMPcomparison3d.combined, assay='RNA', slot='counts')
+writeMM(counts_matrix, file=paste0(out_data_dir, 'counts.mtx'))
+
+# write dimesnionality reduction matrix, in this example case pca matrix
+write.csv(BMPcomparison3d.combined@reductions$pca@cell.embeddings, file='pca.csv', quote=F,row.names=F)
+
+# write gene names
+write.table(
+  data.frame('gene'=rownames(counts_matrix)),file='gene_names.csv', quote=F,row.names=F,col.names=F)
+
+
+-----------------------------------------------------------------------------------------------------------
+  # For Islets of control+BMP7- ST2
+  
+  ISLETST2RE3d <- RunUMAP(BMP_ISLETSRE,
+                          dims = 1:10,
+                          n.components = 3L)
+
+# Extract tSNE information from Seurat Object
+umap_1 <- ISLETST2RE3d[["umap"]]@cell.embeddings[,1]
+umap_2 <- ISLETST2RE3d[["umap"]]@cell.embeddings[,2]
+umap_3 <- ISLETST2RE3d[["umap"]]@cell.embeddings[,3]
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Embeddings(object = ISLETST2RE3d, reduction = "umap")
+
+# Prepare a dataframe for cell plotting
+plotting.data5 <- FetchData(object = ISLETST2RE3d, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "seurat_clusters"))
+
+plotting.data6 <- FetchData(object = ISLETST2RE3d, vars = c("UMAP_1", "UMAP_2", "UMAP_3"))
+
+# Make a column of row name identities (these will be your cell/barcode names)
+plotting.data5$label <- paste(rownames(plotting.data5))
+
+plotting.data1$label <- paste(rownames(plotting.data1))
+
+write.csv(plotting.data1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/umap_coords.csv')
+
+plotting.data$CellType <- Idents(DiabetesST2UMAP.combined)
+head(x = plotting.data5[[]])
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+plot_ly(data = plotting.data5, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~seurat_clusters, 
+        colors = c("#f8766d", "#0cb702", "#1e90ff"),
+        type = "scatter3d", 
+        mode = "markers", 
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") 
+
+
+
+# create a dataframe
+plotting.data8 <- FetchData(object = ISLETST2RE3d, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "INS"), slot = 'data')
+
+# Say you want change the scale, so that every cell having an expression >1 will be one color
+# Basically, you are re-adjusting the scale here, so that any cell having a certain expression will light up on your 3D plot
+
+# First make another column in your dataframe, where all values above 1 are re-assigned a value of 1
+# This information is stored in the 'changed' column of your dataframe
+plotting.data8$changed <- ifelse(test = plotting.data8$INS <3, yes = plotting.data8$INS, no = 1)
+
+# Add the label column, so that now the column has 'cellname-its expression value'
+plotting.data8$label <- paste(rownames(plotting.data8)," - ", plotting.data8$INS, sep="")
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20), and cells express a gene called INS
+plot_ly(data = plotting.data8, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~changed, # you can just run this against the column for the gene as well using ~INS, the algorith will automatically scale in that case based on maximal and minimal values
+        opacity = .5,
+        colors = c('darkgreen', 'red'), 
+        type = "scatter3d", 
+        mode = "markers",
+        marker = list(size = 5, width=2), 
+        text=~label,
+        hoverinfo="text"
+)
+
+-----------------------------------------------------------------------------------------------------------
+  # For Islets of BMP7- ST2+ST3
+  
+  BMP_ISLETSRE3d <- RunUMAP(BMP_ISLETSRE,
+                            dims = 1:10,
+                            n.components = 3L)
+
+# Extract tSNE information from Seurat Object
+umap_1 <- BMP_ISLETSRE3d[["umap"]]@cell.embeddings[,1]
+umap_2 <- BMP_ISLETSRE3d[["umap"]]@cell.embeddings[,2]
+umap_3 <- BMP_ISLETSRE3d[["umap"]]@cell.embeddings[,3]
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Embeddings(object = BMP_ISLETSRE3d, reduction = "umap")
+
+# Prepare a dataframe for cell plotting
+plotting.data10 <- FetchData(object = BMP_ISLETSRE3d, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "seurat_clusters"))
+
+
+# Make a column of row name identities (these will be your cell/barcode names)
+plotting.data10$label <- paste(rownames(plotting.data10))
+
+
+head(x = plotting.data10[[]])
+
+# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+plot_ly(data = plotting.data10, 
+        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
+        color = ~seurat_clusters, 
+        colors = c("greenyellow","#f8766d","#1e90ff","#0cb702"),
+        type = "scatter3d", 
+        mode = "markers", 
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") 
