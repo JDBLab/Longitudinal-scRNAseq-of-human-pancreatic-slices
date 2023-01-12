@@ -1,7 +1,9 @@
-# 3D UMAP plots of seurat v3.0.0-v3.1.1 objects utilizing the visualization 
+# This is the adptation of code deevelop by @Dragonmasterx87 (Dept. of Cell Biology, UM) and @msaadsadiq (Dept. of Electrical and Computer Engineering, UM)
+
+# 3D UMAP plots of Seurat_4.1.1 objects utilizing the visualization 
 # package plot_ly
 
-# R v3.5.3 (x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
+# R version 4.1.3(x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
 
 # Seurat is a multimodal single Cell RNA seq analysis algorithm created by
 # The Satija Lab. For more information please see: https://satijalab.org/seurat/
@@ -16,9 +18,9 @@ install.packages('plotly')
 # Load plot_ly
 library(plotly)
 
-# Construct a dataframe using data from your pre-clustered Seurat v3.1.1 object
+# Construct a dataframe using data from your pre-clustered Seurat_4.1.1  object
 # Here 'seurat_clusters' is list of numeric cluster identities, you can find it here: DiabetesST2UMAP3d.combined[["seurat_cluster"]], 
-# or DiabetesST2UMAP3d.combined$seurat_clusters, where 'DiabetesST2UMAP3d.combined' is a Seurat object created with Seurat v3.1.1 (works for v3.0.0 as well)
+# or DiabetesST2UMAP3d.combined$seurat_clusters, where 'DiabetesST2UMAP3d.combined' is a Seurat object created with Seurat_4.1.1 
 DiabetesST2UMAP.combined <- "integrated"
 
 # Re-run UMAPs that you have accurate calculations for all UMAP(s)
@@ -26,7 +28,7 @@ DiabetesST2UMAP3d.combined <- RunUMAP(DiabetesST2UMAP.combined_AD,
                                       dims = 1:10,
                                       n.components = 3L)
 
-# Extract tSNE information from Seurat Object
+# Extract UMAP information from Seurat Object
 umap_1 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,1]
 umap_2 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,2]
 umap_3 <- DiabetesST2UMAP3d.combined[["umap"]]@cell.embeddings[,3]
@@ -49,7 +51,7 @@ write.csv(plotting.data1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/Ne
 plotting.data$CellType <- Idents(DiabetesST2UMAP.combined)
 head(x = plotting.data[[]])
 
-# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+# Plot your data, in this example my Seurat object had 17 clusters (0-20)
 plot_ly(data = plotting.data, 
         x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
         color = ~integrated_snn_res.0.2, 
@@ -158,11 +160,11 @@ write.table(
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  # BMP7- ST2+ST3
+  # BMP7- TimePoint_1+TimePoint-2
   
   # Interacive multimodal 3D UMAP plotting of scRNA sequencing datasets
   # The following is a length of code generated to create nice 
-  # 3D UMAP plots of seurat v3.0.0-v3.1.1 objects utilizing the visualization 
+  # 3D UMAP plots of Seurat_4.1.1 objects utilizing the visualization 
   # package plot_ly
   
   # R v3.5.3 (x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
@@ -180,9 +182,9 @@ install.packages('plotly')
 # Load plot_ly
 library(plotly)
 
-# Construct a dataframe using data from your pre-clustered Seurat v3.1.1 object
+# Construct a dataframe using data from your pre-clustered Seurat_4.1.1 object
 # Here 'seurat_clusters' is list of numeric cluster identities, you can find it here: BMPcomparison3d.combined[["seurat_cluster"]], 
-# or BMPcomparison3d.combined$seurat_clusters, where 'BMPcomparison3d.combined' is a Seurat object created with Seurat v3.1.1 (works for v3.0.0 as well)
+# or BMPcomparison3d.combined$seurat_clusters, where 'BMPcomparison3d.combined' is a Seurat object created with Seurat_4.1.1 
 BMPcomparison.combinedUMAP2<- "integrated"
 
 # Re-run UMAPs that you have accurate calculations for all UMAP(s)
@@ -190,7 +192,7 @@ BMPcomparison3d.combined <- RunUMAP(BMPcomparison.combinedUMAP2,
                                     dims = 1:10,
                                     n.components = 3L)
 
-# Extract tSNE information from Seurat Object
+# Extract UMAP information from Seurat Object
 umap_1 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,1]
 umap_2 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,2]
 umap_3 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,3]
@@ -213,7 +215,7 @@ write.csv(plotting.data2, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/Ne
 plotting.data2$CellType <- Idents(BMPcomparison.combinedUMAP2)
 head(x = plotting.data2[[]])
 
-# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+# Plot your data, in this example my Seurat object had 14 clusters (0-20)
 plot_ly(data = plotting.data2, 
         x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
         color = ~CellType, 
@@ -257,7 +259,7 @@ plotting.data$changed <- ifelse(test = plotting.data$ACTB <1, yes = plotting.dat
 # Add the label column, so that now the column has 'cellname-its expression value'
 plotting.data$label <- paste(rownames(plotting.data)," - ", plotting.data$ACTB, sep="")
 
-# Plot your data, in this example my Seurat object had 21 clusters (0-20), and cells express a gene called ACTB
+# Plot your data
 plot_ly(data = plotting.data, 
         x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
         color = ~changed, # you can just run this against the column for the gene as well using ~ACTB, the algorith will automatically scale in that case based on maximal and minimal values
@@ -281,43 +283,16 @@ plot_ly(data = plotting.data,
 # Have a wonderful day!!
 
 
-# Run plot3d and while the rgl widget is open run the code below to generate a html file in the plots panel of RStudio
-# You can save as a html file via export. These files work with optimal resolution and are most user friendly in Google Chrome 
-
-rgl::rglwidget() #save as html
-BMPcomparison3d.combined$barcode <- colnames(BMPcomparison3d.combined)
-BMPcomparison3d.combined$UMAP_1 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,1]
-BMPcomparison3d.combined$umap_2 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,2]
-BMPcomparison3d.combined$umap_3 <- BMPcomparison3d.combined[["umap"]]@cell.embeddings[,3]
-write.csv(BMPcomparison3d.combined@meta.data, file='metadata.csv', quote=F, row.names=F)
-
-DefaultAssay(object = BMPcomparison3d.combined) <- "RNA"
-BMPcomparison3d.combined <- NormalizeData(BMPcomparison3d.combined)
-BMPcomparison3d.combined <- SCTransform(BMPcomparison3d.combined, assay = "RNA", new.assay.name = "SCT", verbose = TRUE, return.only.var.genes = TRUE)
-
-
-out_data_dir="C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW"
-# write expression counts matrix
-library(Matrix)
-counts_matrix <- GetAssayData(BMPcomparison3d.combined, assay='RNA', slot='counts')
-writeMM(counts_matrix, file=paste0(out_data_dir, 'counts.mtx'))
-
-# write dimesnionality reduction matrix, in this example case pca matrix
-write.csv(BMPcomparison3d.combined@reductions$pca@cell.embeddings, file='pca.csv', quote=F,row.names=F)
-
-# write gene names
-write.table(
-  data.frame('gene'=rownames(counts_matrix)),file='gene_names.csv', quote=F,row.names=F,col.names=F)
 
 
 -----------------------------------------------------------------------------------------------------------
-  # For Islets of control+BMP7- ST2
+  # For Islets of control+BMP7- TimePoint_1
   
   ISLETST2RE3d <- RunUMAP(BMP_ISLETSRE,
                           dims = 1:10,
                           n.components = 3L)
 
-# Extract tSNE information from Seurat Object
+# Extract UMAP information from Seurat Object
 umap_1 <- ISLETST2RE3d[["umap"]]@cell.embeddings[,1]
 umap_2 <- ISLETST2RE3d[["umap"]]@cell.embeddings[,2]
 umap_3 <- ISLETST2RE3d[["umap"]]@cell.embeddings[,3]
@@ -340,7 +315,7 @@ write.csv(plotting.data1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/Ne
 plotting.data$CellType <- Idents(DiabetesST2UMAP.combined)
 head(x = plotting.data5[[]])
 
-# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+# Plot your data, in this example my Seurat object had 3 clusters 
 plot_ly(data = plotting.data5, 
         x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
         color = ~seurat_clusters, 
@@ -380,13 +355,13 @@ plot_ly(data = plotting.data8,
 )
 
 -----------------------------------------------------------------------------------------------------------
-  # For Islets of BMP7- ST2+ST3
+  # For Islets of BMP7- TimePoint_1+TimePoint_2
   
   BMP_ISLETSRE3d <- RunUMAP(BMP_ISLETSRE,
                             dims = 1:10,
                             n.components = 3L)
 
-# Extract tSNE information from Seurat Object
+# Extract UMAP information from Seurat Object
 umap_1 <- BMP_ISLETSRE3d[["umap"]]@cell.embeddings[,1]
 umap_2 <- BMP_ISLETSRE3d[["umap"]]@cell.embeddings[,2]
 umap_3 <- BMP_ISLETSRE3d[["umap"]]@cell.embeddings[,3]
@@ -404,7 +379,7 @@ plotting.data10$label <- paste(rownames(plotting.data10))
 
 head(x = plotting.data10[[]])
 
-# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+# Plot your data, in this example my Seurat object had 4 clusters 
 plot_ly(data = plotting.data10, 
         x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
         color = ~seurat_clusters, 
