@@ -1,9 +1,10 @@
-# This is the adptation of code deevelop by @Dragonmasterx87 (Dept. of Cell Biology, UM) and @msaadsadiq (Dept. of Electrical and Computer Engineering, UM)
+# This is the adptation of code developed by @Dragonmasterx87 (Dept. of Cell Biology, UM) and @msaadsadiq (Dept. of Electrical and Computer Engineering, UM)
 
 # 3D UMAP plots of Seurat_4.1.1 objects utilizing the visualization 
 # package plot_ly
 
-# R version 4.1.3(x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
+# R version 4.1.3(x64 bit) and RStudio 2022.07.1+554 "Spotted Wakerobin" Release (7872775ebddc40635780ca1ed238934c3345c5de, 2022-07-22) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.8 Chrome/69.0.3497.128 Safari/537.36  were used for running this code :)
 
 # Seurat is a multimodal single Cell RNA seq analysis algorithm created by
 # The Satija Lab. For more information please see: https://satijalab.org/seurat/
@@ -83,41 +84,7 @@ plot_ly(data = plotting.data,
         marker = list(size = 5, width=2), # controls size of points
         text=~label, #This is that extra column we made earlier for which we will use for cell ID
         hoverinfo="text")
-# Say you wanto make a gene-expression 3D plot, where you can plot gene expression against a color scale
-# Here using the same seurat object as above, we extract gene expression information for beta-actin 'ACTB'
-# Here we concentrate on SCT normalized data, or log normalized RNA NOT raw counts.
-# In addition if you want, you may look at normalised-RNA, SCT or integrated slots, to look at gene expression
-# Setting your DefaultAssay() will inform R which assay to pick up expression data from.
-DefaultAssay(object = pancreas.integrated)
-DefaultAssay(object = pancreas.integrated) <- "RNA"
-DefaultAssay(object = pancreas.integrated) <- "integrated"
-DefaultAssay(object = pancreas.integrated) <- "SCT"
 
-# create a dataframe
-plotting.data <- FetchData(object = DiabetesST2UMAP3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "ACTB"), slot = 'data')
-
-# Say you want change the scale, so that every cell having an expression >1 will be one color
-# Basically, you are re-adjusting the scale here, so that any cell having a certain expression will light up on your 3D plot
-
-# First make another column in your dataframe, where all values above 1 are re-assigned a value of 1
-# This information is stored in the 'changed' column of your dataframe
-plotting.data$changed <- ifelse(test = plotting.data$ACTB <1, yes = plotting.data$ACTB, no = 1)
-
-# Add the label column, so that now the column has 'cellname-its expression value'
-plotting.data$label <- paste(rownames(plotting.data)," - ", plotting.data$ACTB, sep="")
-
-# Plot your data, in this example my Seurat object had 21 clusters (0-20), and cells express a gene called ACTB
-plot_ly(data = plotting.data, 
-        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
-        color = ~changed, # you can just run this against the column for the gene as well using ~ACTB, the algorith will automatically scale in that case based on maximal and minimal values
-        opacity = .5,
-        colors = c('darkgreen', 'red'), 
-        type = "scatter3d", 
-        mode = "markers",
-        marker = list(size = 5, width=2), 
-        text=~label,
-        hoverinfo="text"
-)
 
 # On running this code the HTML output should appear in RStudio. You can save the output as a
 # HTML file. Once you have saved, just open the HTML file in any web browser (double click on the html- file
@@ -167,7 +134,8 @@ write.table(
   # 3D UMAP plots of Seurat_4.1.1 objects utilizing the visualization 
   # package plot_ly
   
-  # R v3.5.3 (x64 bit) and RStudio v1.2.1335 (x64 bit) were used for running this code :)
+  # R version 4.1.3(x64 bit) and RStudio 2022.07.1+554 "Spotted Wakerobin" Release (7872775ebddc40635780ca1ed238934c3345c5de, 2022-07-22) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.8 Chrome/69.0.3497.128 Safari/537.36  were used for running this code :)
   
   # Seurat is a multimodal single Cell RNA seq analysis algorithm created by
 # The Satija Lab. For more information please see: https://satijalab.org/seurat/
@@ -235,53 +203,6 @@ plot_ly(data = plotting.data2,
         marker = list(size = 5, width=2), # controls size of points
         text=~label, #This is that extra column we made earlier for which we will use for cell ID
         hoverinfo="text") #When you visualize your plotly object, hovering your mouse pointer over a point shows cell names
-
-# Say you wanto make a gene-expression 3D plot, where you can plot gene expression against a color scale
-# Here using the same seurat object as above, we extract gene expression information for beta-actin 'ACTB'
-# Here we concentrate on SCT normalized data, or log normalized RNA NOT raw counts.
-# In addition if you want, you may look at normalised-RNA, SCT or integrated slots, to look at gene expression
-# Setting your DefaultAssay() will inform R which assay to pick up expression data from.
-DefaultAssay(object = pancreas.integrated)
-DefaultAssay(object = pancreas.integrated) <- "RNA"
-DefaultAssay(object = pancreas.integrated) <- "integrated"
-DefaultAssay(object = pancreas.integrated) <- "SCT"
-
-# create a dataframe
-plotting.data <- FetchData(object = BMPcomparison3d.combined, vars = c("UMAP_1", "UMAP_2", "UMAP_3", "ACTB"), slot = 'data')
-
-# Say you want change the scale, so that every cell having an expression >1 will be one color
-# Basically, you are re-adjusting the scale here, so that any cell having a certain expression will light up on your 3D plot
-
-# First make another column in your dataframe, where all values above 1 are re-assigned a value of 1
-# This information is stored in the 'changed' column of your dataframe
-plotting.data$changed <- ifelse(test = plotting.data$ACTB <1, yes = plotting.data$ACTB, no = 1)
-
-# Add the label column, so that now the column has 'cellname-its expression value'
-plotting.data$label <- paste(rownames(plotting.data)," - ", plotting.data$ACTB, sep="")
-
-# Plot your data
-plot_ly(data = plotting.data, 
-        x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, 
-        color = ~changed, # you can just run this against the column for the gene as well using ~ACTB, the algorith will automatically scale in that case based on maximal and minimal values
-        opacity = .5,
-        colors = c('darkgreen', 'red'), 
-        type = "scatter3d", 
-        mode = "markers",
-        marker = list(size = 5, width=2), 
-        text=~label,
-        hoverinfo="text"
-)
-
-# On running this code the HTML output should appear in RStudio. You can save the output as a
-# HTML file. Once you have saved, just open the HTML file in any web browser (double click on the html- file
-# and if asked select to open with any web browser like google chrome/safari/mozilla/explorer etc).
-# It should be have all of the integrated features you saw in the RStudio output file.
-
-# Thank you for reading and using this code to further your scRNAseq analysis!
-# If you liked it, dont forget to acknowledge, fork and star!
-# Citation information is within the Readme, please dont forget to cite!
-# Have a wonderful day!!
-
 
 
 
