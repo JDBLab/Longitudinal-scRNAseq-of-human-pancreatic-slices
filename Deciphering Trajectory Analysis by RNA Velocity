@@ -1,1 +1,22 @@
-In order to understand cell trajectory analyses upon the treatment of BMP7, we utilized RNA velocity algorithms. We identified progenitor cells with the help of Seurat v4.0 (R package designed for QC, analysis, and exploration of single-cell RNA-seq data. Seurat aims to enable users to identify and interpret sources of heterogeneity from single-cell transcriptomic measurements, and to integrate diverse types of single-cell data)  and tracked down 
+Introduction
+Generating Loom files
+Kallisto Bustools
+Installation
+Usage
+Velocyto
+Installation
+Usage
+Extracting Meta-data From a Seurat Object
+Integrating Loom File and Meta-data
+Multiple-Sample Integration
+Running RNA Velocity
+FAQ
+
+Introduction
+In order to understand cell trajectory analyses upon the treatment of BMP7, we utilized RNA velocity algorithms. We identified progenitor cells with the help of Seurat v4.0 (R package) and dissect cell fate changes at the single cell level in response to BMP-7 in a human pancreatic slices. 
+This file contains a detailed procedure we followed to get the trajectory analysis.
+The code which we used for the following procedure are adptated from the following tutorials- 
+  i) scVelo infers gene-specific rates of transcription, splicing and degradation, and recovers the latent time of the underlying cellular processes. This latent time represents the cell’s internal clock and approximates the real time experienced by cells as they differentiate, based only on its transcriptional dynamics. Moreover, scVelo identifies regimes of regulatory changes such as stages of cell fate commitment and, therein, systematically detects putative driver genes.
+   scVelo is developed by Bergen et al. (Nature Biotechnology, 2020). We followed documentation for the analysis- https://scvelo.readthedocs.io/en/stable/getting_started/
+   © Copyright 2022, Volker Bergen Revision ce52f584.
+  ii) 
