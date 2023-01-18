@@ -5,11 +5,57 @@ Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
 # The Satija Lab. For more information please see: https://satijalab.org/seurat/
 # LOAD LIBRARIES ####
 # Restart Rstudio or R
+
+install.packages("devtools")
+install.packages("usethis")
+library(usethis)
+library(devtools)
+install.packages("pkgbuild")
+library(pkgbuild)
+install.packages("Matrix")
+install.packages("ggridges")
+install.packages("cowplot")
+install.packages('ggrepel')
+install.packages("R.utils")
+install.packages("gridExtra")
+install.packages("Seurat")
+install.packages("plotly")
+install.packages("clustree")
+install.packages('multtest')
+install.packages("ggplot2")
+install.packages("ggraph")
+install.packages('Seurat')
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("monocle")
+
+# Install multtest for Seurat
+BiocManager::install("multtest")
+library(ggplot2)
+library(cowplot)
+library(Matrix)
+library(ggridges)
+library(ggrepel)
+library(dplyr)
+library(Seurat)
+library(plotly)
+library(clustree)
+library(Seurat)
+library(ggraph)
+library(Matrix)
+library(VGAM)
+library(stats4)
+library(splines)
+library(DDRTree)
+library(irlba)
+library(BiocGenerics)
+library(Biobase)
+
 # Run the following code once you have Seurat installed
 # Set global environment parameter
 options(future.globals.maxSize= 89128960)
 memory.limit()
-memory.limit(size=21474836480)  
+memory.limit(size=21474836480) 
 
 # Setup BMP7-ST2(Timepoint 1 and TimePoint 2) Seuratobject
 
