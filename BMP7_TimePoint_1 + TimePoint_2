@@ -57,7 +57,7 @@ options(future.globals.maxSize= 89128960)
 memory.limit()
 memory.limit(size=21474836480) 
 
-# Setup BMP7-ST2(Timepoint 1 and TimePoint 2) Seuratobject
+# Setup BMP7-ST2 + ST3 (Timepoint 1 and TimePoint 2) Seuratobject
 
 # OBJECT SETUP AND NORMALIZATION ####
 #  Load 10X data ####
