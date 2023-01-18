@@ -1,1 +1,321 @@
+# R version 4.1.3(x64 bit) and RStudio 2022.07.1+554 "Spotted Wakerobin" Release (7872775ebddc40635780ca1ed238934c3345c5de, 2022-07-22) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.8 Chrome/69.0.3497.128 Safari/537.36  were used for running this code :)
 
+# Seurat is a multimodal single Cell RNA seq analysis algorithm created by
+# The Satija Lab. For more information please see: https://satijalab.org/seurat/
+# LOAD LIBRARIES ####
+# Restart Rstudio or R
+
+install.packages("devtools")
+install.packages("usethis")
+library(usethis)
+library(devtools)
+install.packages("pkgbuild")
+library(pkgbuild)
+install.packages("Matrix")
+install.packages("ggridges")
+install.packages("cowplot")
+install.packages('ggrepel')
+install.packages("R.utils")
+install.packages("gridExtra")
+install.packages("Seurat")
+install.packages("plotly")
+install.packages("clustree")
+install.packages('multtest')
+install.packages("ggplot2")
+install.packages("ggraph")
+install.packages('Seurat')
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("monocle")
+
+# Install multtest for Seurat
+BiocManager::install("multtest")
+library(ggplot2)
+library(cowplot)
+library(Matrix)
+library(ggridges)
+library(ggrepel)
+library(dplyr)
+library(Seurat)
+library(plotly)
+library(clustree)
+library(Seurat)
+library(ggraph)
+library(Matrix)
+library(VGAM)
+library(stats4)
+library(splines)
+library(DDRTree)
+library(irlba)
+library(BiocGenerics)
+library(Biobase)
+
+# Run the following code once you have Seurat installed
+# Set global environment parameter
+options(future.globals.maxSize= 89128960)
+memory.limit()
+memory.limit(size=21474836480) 
+
+# Setup CONTROL-ST2+ST3(Timepoint 1 and TimePoint 2) Seuratobject
+
+# OBJECT SETUP AND NORMALIZATION ####
+#  Load 10X data ####
+# Create Seurat objects ####
+ctrl1st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST2-CTRL/filtered_feature_bc_matrix")
+ctrl1st2 <- CreateSeuratObject(counts = ctrl1st2.data, 
+                               project = "ctrl1st2"
+)
+ctrl2st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-2-CTRL-1/filtered_feature_bc_matrix")
+ctrl2st2 <- CreateSeuratObject(counts = ctrl2st2.data, 
+                               project = "ctrl2st2")
+
+ctrl3st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-2-CTRL-2/filtered_feature_bc_matrix")
+ctrl3st2 <- CreateSeuratObject(counts = ctrl3st2.data, 
+                               project = "ctrl3st2"
+)
+head(x = colnames(x = ctrl1st2))
+ctrl1st2 <- RenameCells(object = ctrl1st2, add.cell.id = "ctrl1st2")
+head(x = colnames(x = ctrl1st2))
+head(x = colnames(x = ctrl2st2))
+ctrl2st2 <- RenameCells(object = ctrl2st2, add.cell.id = "ctrl2st2")
+head(x = colnames(x = ctrl2st2))
+head(x = colnames(x = ctrl3st2))
+ctrl3st2 <- RenameCells(object = ctrl3st2, add.cell.id = "ctrl3st2")
+head(x = colnames(x = ctrl3st2))
+ctrl1st2[["percent.mt"]] <- PercentageFeatureSet(object = ctrl1st2, pattern = "^MT-")
+ctrl2st2[["percent.mt"]] <- PercentageFeatureSet(object = ctrl2st2, pattern = "^MT-")
+ctrl3st2[["percent.mt"]] <- PercentageFeatureSet(object = ctrl3st2, pattern = "^MT-")
+p101 <- VlnPlot(object = ctrl1st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p201 <- VlnPlot(object = ctrl2st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p301 <- VlnPlot(object = ctrl3st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p101, p201, p301), ncol =1)
+p401 <- FeatureScatter(object = ctrl1st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p501 <- FeatureScatter(object = ctrl1st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p601 <- FeatureScatter(object = ctrl2st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p701 <- FeatureScatter(object = ctrl2st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p801 <- FeatureScatter(object = ctrl3st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p901 <- FeatureScatter(object = ctrl3st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p401, p501, p601, p701, p801, p901), ncol =2)
+
+# Thresholding ####
+# RNA based cell thresholding
+# The operator can add columns to object metadata. This is a great place to stash QC stats
+ctrl1st2 <- subset(x =  ctrl1st2, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+ctrl2st2 <- subset(x = ctrl2st2, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+ctrl3st2 <- subset(x = ctrl3st2, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+p1001 <- VlnPlot(object = ctrl1st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p1101 <- VlnPlot(object = ctrl2st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p1201 <- VlnPlot(object = ctrl3st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p1001, p1101, p1201), ncol =1)
+p1301 <- FeatureScatter(object = ctrl1st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p1401 <- FeatureScatter(object = ctrl1st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p1501 <- FeatureScatter(object = ctrl2st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p1601 <- FeatureScatter(object = ctrl2st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p1701 <- FeatureScatter(object = ctrl3st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p1801 <- FeatureScatter(object = ctrl3st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p1301, p1401, p1501, p1601, p1701, p1801), ncol =2)
+
+
+
+ctrlST2 <- sample(x = c("ctrlST2"), size = ncol(x = ctrl1st2), replace = TRUE)
+ctrl1st2$groups <- ctrlST2
+head(x = ctrl1st2[[]])
+
+ctrlST2 <- sample(x = c("ctrlST2"), size = ncol(x = ctrl2st2), replace = TRUE)
+ctrl2st2$groups <- ctrlST2
+head(x = ctrl2st2[[]])
+
+ctrlST2 <- sample(x = c("ctrlST2"), size = ncol(x = ctrl3st2), replace = TRUE)
+ctrl3st2$groups <- ctrlST2
+head(x = ctrl3st2[[]])
+
+# OBJECT SETUP AND NORMALIZATION ####
+#  Load 10X data ####
+# Create Seurat objects ####
+
+control1st3.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-3-CTRL-1/filtered_feature_bc_matrix")
+control2st3.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-3-CTRL-2/filtered_feature_bc_matrix")
+control3st3.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-3-CTRL-3/filtered_feature_bc_matrix")
+control1st3 <- CreateSeuratObject(counts = control1st3.data, 
+                                  project = "control1st3"
+)
+control2st3 <- CreateSeuratObject(counts = control2st3.data, 
+                                  project = "control2st3"
+)
+control3st3 <- CreateSeuratObject(counts = control3st3.data, 
+                                  project = "control3st3"
+)
+
+head(x = colnames(x = control1st3))
+control1st3 <- RenameCells(object = control1st3, add.cell.id = "control1st3")
+head(x = colnames(x = control1st3))
+head(x = colnames(x = control2st3))
+control2st3 <- RenameCells(object = control2st3, add.cell.id = "control2st3")
+head(x = colnames(x = control2st3))
+head(x = colnames(x = control3st3))
+control3st3 <- RenameCells(object = control3st3, add.cell.id = "control3st3")
+head(x = colnames(x = control3st3))
+control1st3[["percent.mt"]] <- PercentageFeatureSet(object = control1st3, pattern = "^MT-")
+control2st3[["percent.mt"]] <- PercentageFeatureSet(object = control2st3, pattern = "^MT-")
+control3st3[["percent.mt"]] <- PercentageFeatureSet(object = control3st3, pattern = "^MT-")
+p1 <- VlnPlot(object = control1st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p2 <- VlnPlot(object = control2st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p3 <- VlnPlot(object = control3st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p1, p2, p3), ncol =1)
+p4 <- FeatureScatter(object = control1st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p5 <- FeatureScatter(object = control1st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p6 <- FeatureScatter(object = control2st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p7 <- FeatureScatter(object = control2st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p8 <- FeatureScatter(object = control3st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p9 <- FeatureScatter(object = control3st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p4, p5, p6, p7, p8, p9), ncol =2)
+
+# Thresholding ####
+# RNA based cell thresholding
+# The operator can add columns to object metadata. This is a great place to stash QC stats
+control1st3 <- subset(x = control1st3, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+control2st3 <- subset(x = control2st3, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+control3st3 <- subset(x = control3st3, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+p10 <- VlnPlot(object = control1st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p11 <- VlnPlot(object = control2st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p12 <- VlnPlot(object = control3st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p10, p11, p12), ncol =1)
+p13 <- FeatureScatter(object = control1st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p14 <- FeatureScatter(object = control1st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p15 <- FeatureScatter(object = control2st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p16 <- FeatureScatter(object = control2st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p17 <- FeatureScatter(object = control3st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p18 <- FeatureScatter(object = control3st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p13, p14, p15, p16, p17, p18), ncol =2)
+
+controlST3 <- sample(x = c("controlST3"), size = ncol(x = control1st3), replace = TRUE)
+control1st3$groups <- controlST3
+head(x = control1st3[[]])
+
+controlST3 <- sample(x = c("controlST3"), size = ncol(x = control2st3), replace = TRUE)
+control2st3$groups <- controlST3
+head(x = control2st3[[]])
+
+controlST3 <- sample(x = c("controlST3"), size = ncol(x = control3st3), replace = TRUE)
+control3st3$groups <- controlST3
+head(x = control3st3[[]])
+
+# Merge Datasets
+# Based on comment to Issue #4753 https://github.com/satijalab/seurat/issues/4753
+# We use RPCA to yield conserved mapping
+controldiabetes1 <- c(ctrl1st2, ctrl2st2, ctrl3st2, control1st3, control2st3, control3st3)
+
+# normalize and identify variable features for each dataset independently
+controldiabetes1.list <- lapply(X = controldiabetes1, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 3000)
+})
+
+# select features that are repeatedly variable across datasets for integration run PCA on each
+# dataset using these features
+features <- SelectIntegrationFeatures(object.list = controldiabetes1.list)
+controldiabetes1.list <- lapply(X = controldiabetes1.list, FUN = function(x) {
+  x <- ScaleData(x, features = features, verbose = FALSE)
+  x <- RunPCA(x, features = features, verbose = FALSE)
+})
+
+# Perform integration
+controldiabetes1.anchors <- FindIntegrationAnchors(object.list = controldiabetes1.list, anchor.features = features, reduction = "rpca")
+controldiabetes1.combined <- IntegrateData(anchorset = controldiabetes1.anchors)
+
+# Run the standard workflow for visualization and clustering
+DefaultAssay(controldiabetes1.combined) <- "integrated"
+controldiabetes1.combined <- ScaleData(controldiabetes1.combined, verbose = FALSE)
+controldiabetes1.combined <- RunPCA(controldiabetes1.combined, npcs = 30, verbose = FALSE)
+controldiabetes1.combined <- RunUMAP(controldiabetes1.combined, reduction = "pca", dims = 1:30)
+controldiabetes1.combined <- FindNeighbors(controldiabetes1.combined, reduction = "pca", dims = 1:30)
+controldiabetes1.combined <- FindClusters(controldiabetes1.combined, resolution = 0.5)
+
+# Visualization
+p1 <- DimPlot(controldiabetes1.combined, reduction = "umap")
+p2 <- DimPlot(controldiabetes1.combined, reduction = "umap", label = TRUE,
+              repel = TRUE)
+p1 + p2
+
+
+# LINEAR DIMENSIONALITY REDUCTION ####
+DefaultAssay(object = controldiabetes1.combined)
+DefaultAssay(object = controldiabetes1.combined) <- "integrated"
+controldiabetes1.combined <- RunPCA(object = controldiabetes1.combined, features = VariableFeatures(object = controldiabetes1.combined))
+print(x = controldiabetes1.combined[["pca"]], dims = 1:5, nfeatures = 5)
+VizDimLoadings(object = controldiabetes1.combined, dims = 1:2, reduction = "pca")
+DimPlot(object = controldiabetes1.combined, reduction = "pca")
+DimHeatmap(object = controldiabetes1.combined, dims = 1, cells = 500, balanced = TRUE)
+DimHeatmap(object = controldiabetes1.combined, dims = 1:15, cells = 500, balanced = TRUE)
+ElbowPlot(object = controldiabetes1.combined)
+
+#CLUSTER ANALYSIS ####
+# Clustering, we run multiple permutations to allow clustree to analyze optimal clustering resolution.
+controldiabetes1.combined <- FindNeighbors(object = controldiabetes1.combined, dims = 1:20)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.1)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.2)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.3)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.4)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.5)
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.6)
+
+# Cluster-tree analysis, looking appropriate non-anomalous clustering resolution
+clustree(controldiabetes1.combined, prefix = "integrated_snn_res.")
+controldiabetes1.combined <- FindClusters(object = controldiabetes1.combined, resolution = 0.4)
+table(controldiabetes1.combined$seurat_clusters)
+table(Idents(controldiabetes1.combined), controldiabetes1.combined$orig.ident)
+controldiabetes1.combined <- RunUMAP(controldiabetes1.combined, dims = 1:30)
+
+# DATA-VISUALIZATION ####
+# note that you can set `label = TRUE` or use the LabelClusters function to help label
+# individual clusters
+p1010 <- DimPlot(object = controldiabetes1.combined, group.by = c("orig.ident", "integrated_snn_res.0.4"), combine = FALSE, pt.size = 1, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+
+controldiabetes1u.combined <- RenameIdents(object= controldiabetes1.combined, `0` = "0", `1` = "1", `2` = "2",`3` = "3", `4` = "4", `5` = "4", `6` = "5", `7` = "6", `8` = "3", `9` = "3",`10` = "2", `11` = "7", `12` = "3", `13` = "8", `14` = "9", `15` = "10", `16` = "11", `17` = "12", `18` = "13")
+DimPlot(controldiabetes1u.combined, label = TRUE, raster = FALSE) 
+
+
+#Renaming the clusters
+controldiabetes.combined_newUMAP2 <- RenameIdents(controldiabetes1u.combined, `2` = "D1", `11` = "D2",
+                                                  `1` = "D3", `10` = "D4",`9` = "D5",  `3` = "A1", `5` = "A2", `0` = "A3", `4` = "A5",
+                                                  `6` = "A6", `8` = "M", `12` = "I", `13` = "E", `7` = "S")
+DimPlot(controldiabetes.combined_newUMAP2, label = TRUE)
+DimPlot(controldiabetes.combined_newUMAP2, label = FALSE)
+
+DimPlot(controldiabetes.combined_newUMAP2, reduction = "umap", 
+        cols =  c("turquoise1","mediumseagreen",
+                  "royalblue1",                                                 
+                  "lightslateblue",
+                  "steelblue1",
+                  "lightgoldenrod2",
+                  "sienna3",
+                  "yellow3",
+                  "yellow",
+                  "darkgoldenrod2",
+                  "pink",
+                  "red", "palegreen2", "grey"), label = TRUE, raster = FALSE,
+        pt.size = 1)
+
+controldiabetes.combined_newUMAP2$CellType <- Idents(controldiabetes.combined_newUMAP2)
+
+saveRDS(controldiabetes.combined_newUMAP2, file = "C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN ONLY-DO NOT TOUCH/Mayur last/Materials and Methods/CONTROL_TimePoint_1+TimePoint_2.rds")
+table((controldiabetes.combined_newUMAP2$CellType),(controldiabetes.combined_newUMAP2$orig.ident))
+head(x = controldiabetes.combined_newUMAP2[[]])
+
+write.csv(controldiabetes.combined_newUMAP2@meta.data, file='controldiabetes.combined_newUMAP2.csv', quote=T, row.names=T)
+
+controldiabetes.combined_newUMAP24 <- subset(controldiabetes.combined_newUMAP2, idents = c("D1",  "D2",
+                                                                                           "D3", "D4","D5","A1","A2", "A3","A5",
+                                                                                           "A6", "I"))
+
+head(x = controldiabetes.combined_newUMAP24[[]])
+controldiabetes1.combined.markers <- FindAllMarkers(controldiabetes1.combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.41)
+controldiabetes1.combined.markers %>%
+  group_by(clusters) %>%
+  slice_max(n = 2, order_by = avg_log2FC)
+
+write.csv(controldiabetes1.combined.markers, 'C:/Users/mad1188/Box/Diabetes_new/All controls at Stage 2 and 3/Controlmarkers_celltype.csv')
