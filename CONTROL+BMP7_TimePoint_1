@@ -51,11 +51,15 @@ library(irlba)
 library(BiocGenerics)
 library(Biobase)
 
+# Set global environment parameter
 options(future.globals.maxSize= 89128960)
 memory.limit()
 memory.limit(size=21474836480)  
 
+# Setup BMP7-ST2(Timepoint 1) Seuratobject
 
+# OBJECT SETUP AND NORMALIZATION ####
+#  Load 10X data ####
 library(SeuratData)
 library(SeuratObject)
 library(Seurat)
@@ -63,7 +67,7 @@ BMP1st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellrang
 BMP2st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-2-BMP-7/filtered_feature_bc_matrix")
 BMP3st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST--2-bmp-7/filtered_feature_bc_matrix")
 
-
+# Create Seurat objects ####
 BMP1st2 <- CreateSeuratObject(counts = BMP1st2.data,
                               project = "BMP1st2"
 )
@@ -86,7 +90,9 @@ head(x = colnames(x = BMP3st2))
 
 
 
-
+# Thresholding ####
+# RNA based cell thresholding
+# The operator can add columns to object metadata. This is a great place to stash QC stats
 
 BMP1st2[["percent.mt"]] <- PercentageFeatureSet(object = BMP1st2, pattern = "^MT-")
 BMP2st2[["percent.mt"]] <- PercentageFeatureSet(object = BMP2st2, pattern = "^MT-")
@@ -131,7 +137,10 @@ BMP7ST2 <- sample(x = c("BMP7ST2"), size = ncol(x = BMP3st2), replace = TRUE)
 BMP3st2$groups <- BMP7ST2
 head(x = BMP3st2[[]])
 
-
+# Setup CONTROL-ST2(Timepoint 1) Seuratobject
+# OBJECT SETUP AND NORMALIZATION ####
+# Load 10X data ####
+# Create Seurat objects ####
 
 ctrl1st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST2-CTRL/filtered_feature_bc_matrix")
 ctrl1st2 <- CreateSeuratObject(counts = ctrl1st2.data,
@@ -154,6 +163,12 @@ head(x = colnames(x = ctrl2st2))
 head(x = colnames(x = ctrl3st2))
 ctrl3st2 <- RenameCells(object = ctrl3st2, add.cell.id = "ctrl3st2")
 head(x = colnames(x = ctrl3st2))
+
+
+# Thresholding ####
+# RNA based cell thresholding
+# The operator can add columns to object metadata. This is a great place to stash QC stats
+
 ctrl1st2[["percent.mt"]] <- PercentageFeatureSet(object = ctrl1st2, pattern = "^MT-")
 ctrl2st2[["percent.mt"]] <- PercentageFeatureSet(object = ctrl2st2, pattern = "^MT-")
 ctrl3st2[["percent.mt"]] <- PercentageFeatureSet(object = ctrl3st2, pattern = "^MT-")
@@ -198,19 +213,31 @@ ctrl3st2$groups <- ctrlST2
 head(x = ctrl3st2[[]])
 
 
+# Merge Datasets
+# Based on comment to Issue #4753 https://github.com/satijalab/seurat/issues/4753
+# We use RPCA to yield conserved mapping
+
 DiabetesST2<- c(ctrl1st2, ctrl2st2, ctrl3st2,BMP1st2,BMP2st2,BMP3st2)
 
+# normalize and identify variable features for each dataset independently
 DiabetesST2.list <- lapply(X = DiabetesST2, FUN = function(x) {
   x <- NormalizeData(x)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 3000)
 })
+
+# select features that are repeatedly variable across datasets for integration run PCA on each
+# dataset using these features
 features <- SelectIntegrationFeatures(object.list = DiabetesST2.list)
 DiabetesST2.list <- lapply(X = DiabetesST2.list, FUN = function(x) {
   x <- ScaleData(x, features = features, verbose = FALSE)
   x <- RunPCA(x, features = features, verbose = FALSE)
 })
+
+# Perform integration
 DiabetesST2.anchors <- FindIntegrationAnchors(object.list = DiabetesST2.list, anchor.features = features, reduction = "rpca")
 DiabetesST2.combined <- IntegrateData(anchorset = DiabetesST2.anchors)
+
+# Run the standard workflow for visualization and clustering
 DefaultAssay(DiabetesST2.combined) <- "integrated"
 DiabetesST2.combined <- ScaleData(DiabetesST2.combined, verbose = FALSE)
 DiabetesST2.combined <- RunPCA(DiabetesST2.combined, npcs = 30, verbose = FALSE)
@@ -218,12 +245,13 @@ DiabetesST2.combined <- RunUMAP(DiabetesST2.combined, reduction = "pca", dims = 
 DiabetesST2.combined <- FindNeighbors(DiabetesST2.combined, reduction = "pca", dims = 1:30)
 DiabetesST2.combined <- FindClusters(DiabetesST2.combined, resolution = 0.4)
 
+# Visualization
 p3 <- DimPlot(DiabetesST2.combined, reduction = "umap", raster = FALSE)
 p4 <- DimPlot(DiabetesST2.combined, reduction = "umap", label = TRUE,raster = FALSE,
               repel = TRUE)
 p3 + p4
 
-
+# Linear dimensionality assessment
 DefaultAssay(object = DiabetesST2.combined)
 DefaultAssay(object = DiabetesST2.combined) <- "integrated"
 DiabetesST2.combined <- RunPCA(object = DiabetesST2.combined, features = VariableFeatures(object = DiabetesST2.combined))
@@ -233,6 +261,9 @@ DimPlot(object = DiabetesST2.combined, reduction = "pca")
 DimHeatmap(object = DiabetesST2.combined, dims = 1, cells = 500, balanced = TRUE)
 DimHeatmap(object = DiabetesST2.combined, dims = 1:15, cells = 500, balanced = TRUE)
 ElbowPlot(object = DiabetesST2.combined)
+
+#CLUSTER ANALYSIS ####
+# Clustering, we run multiple permutations to allow clustree to analyze optimal clustering resolution.
 DiabetesST2.combined <- FindNeighbors(object = DiabetesST2.combined, dims = 1:20)
 DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution = 0)
 DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution = 0.1)
@@ -241,6 +272,8 @@ DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution =
 DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution = 0.4)
 DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution = 0.5)
 DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution = 0.6)
+
+# Cluster-tree analysis, looking appropriate non-anomalous clustering resolution
 clustree(DiabetesST2.combined, prefix = "integrated_snn_res.")
 DiabetesST2.combined <- FindClusters(object = DiabetesST2.combined, resolution = 0.4)
 
@@ -251,6 +284,9 @@ p1010 <- DimPlot(object = DiabetesST2.combined, group.by = c("orig.ident", "inte
 p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
 CombinePlots(p1010)
 
+# DATA-VISUALIZATION ####
+# note that you can set `label = TRUE` or use the LabelClusters function to help label
+# individual clusters
 DiabetesST2UMAP.combined <- RenameIdents(DiabetesST2.combined, `0` = "A2.1", `1` = "D1", `2` = "A5", `3` = "D3", `4` = "A4", `5` = "A2", `6` = "D6", `7` = "A7", `8` = "A1", `9` = "S",`10` = "D2", `11` = "M", `12` = "DX", `13` = "I", `14` = "D4", `15` = "E", `16` = "D7")
 DimPlot(DiabetesST2UMAP.combined, label = TRUE, raster = FALSE)
 DimPlot(DiabetesST2UMAP.combined, label = FALSE, raster = FALSE)
@@ -275,7 +311,7 @@ DimPlot(DiabetesST2UMAP.combined, reduction = "umap",
         ),
         pt.size = 1, raster = FALSE, label = TRUE)
 
-
+#Renaming the clusters
 DiabetesST2UMAP.combined_AD <- RenameIdents(DiabetesST2.combined, `1` = "D1",`10` = "D2",`3` = "D3",`14` = "D4",`6` = "D6",`16` = "D7",`12` = "DX",`8` = "A1",`5` = "A2",`0` = "A2.1", `4` = "A4", `2` = "A5",`7` = "A7", `9` = "S", `11` = "M",  `13` = "I",  `15` = "E")
 DimPlot(DiabetesST2UMAP.combined_AD, label = TRUE, raster = FALSE)
 DimPlot(DiabetesST2UMAP.combined_AD, label = FALSE, raster = FALSE)
@@ -325,6 +361,7 @@ Diabetes9.markers <- FindAllMarkers(object = DiabetesST2.combined,
 library(magrittr)
 library(dplyr)
 
+#Finding differentially expressed features (cluster biomarkers)
 library(magrittr)
 library(dplyr)
 DiabetesST2.combined.markers <- FindAllMarkers(DiabetesST2.combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
@@ -334,3 +371,5 @@ DiabetesST2.combined.markers %>%
 
 write.csv(DiabetesST2.combined.markers, 'C:/Users/mad1188/Box/Diabetes_new/The whole UMAP/BMPmarkers.csv')
 
+# save seuratobject
+saveRDS(DiabetesST2UMAP.combined, file = "C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN ONLY-DO NOT TOUCH/Mayur last/Materials and Methods/CONTROL+BMP7_TimePoint_1.rds")
