@@ -1,1 +1,285 @@
+# R version 4.1.3(x64 bit) and RStudio 2022.07.1+554 "Spotted Wakerobin" Release (7872775ebddc40635780ca1ed238934c3345c5de, 2022-07-22) for Windows
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.8 Chrome/69.0.3497.128 Safari/537.36  were used for running this code :)
 
+# Seurat is a multimodal single Cell RNA seq analysis algorithm created by
+# The Satija Lab. For more information please see: https://satijalab.org/seurat/
+# LOAD LIBRARIES ####
+# Restart Rstudio or R
+# Run the following code once you have Seurat installed
+# Set global environment parameter
+options(future.globals.maxSize= 89128960)
+memory.limit()
+memory.limit(size=21474836480)  
+
+# Setup BMP7-ST2(Timepoint 1 and TimePoint 2) Seuratobject
+
+# OBJECT SETUP AND NORMALIZATION ####
+#  Load 10X data ####
+library(SeuratData)
+library(SeuratObject)
+library(Seurat)
+BMP1st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST2-BMP-7/filtered_feature_bc_matrix")
+BMP2st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST-2-BMP-7/filtered_feature_bc_matrix")
+BMP3st2.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST--2-bmp-7/filtered_feature_bc_matrix")
+
+BMP1st3.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST3-BMP-7-1/filtered_feature_bc_matrix")
+BMP2st3.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST3-BMP-7-2/filtered_feature_bc_matrix")
+BMP3st3.data <-Read10X(data.dir = "C:/Users/mad1188/Box/Sequencing Data/cellranger_count/ST3-BMP-7-3/filtered_feature_bc_matrix")
+
+# Create Seurat objects ####
+BMP1st2 <- CreateSeuratObject(counts = BMP1st2.data, 
+                              project = "BMP1st2"
+)
+BMP2st2 <- CreateSeuratObject(counts = BMP2st2.data, 
+                              project = "BMP2st2"
+)
+BMP3st2 <- CreateSeuratObject(counts = BMP3st2.data, 
+                              project = "BMP3st2"
+)
+
+head(x = colnames(x = BMP1st2))
+BMP1st2 <- RenameCells(object = BMP1st2, add.cell.id = "BMP1st2")
+head(x = colnames(x = BMP1st2))
+head(x = colnames(x = BMP2st2))
+BMP2st2 <- RenameCells(object = BMP2st2, add.cell.id = "BMP2st2")
+head(x = colnames(x = BMP2st2))
+head(x = colnames(x = BMP3st2))
+BMP3st2 <- RenameCells(object = BMP3st2, add.cell.id = "BMP3st2")
+head(x = colnames(x = BMP3st2))
+
+
+
+
+BMP1st3 <- CreateSeuratObject(counts = BMP1st3.data, 
+                              project = "BMP1st3"
+)
+BMP2st3 <- CreateSeuratObject(counts = BMP2st3.data, 
+                              project = "BMP2st3"
+)
+BMP3st3 <- CreateSeuratObject(counts = BMP3st3.data, 
+                              project = "BMP3st3"
+)
+
+
+
+head(x = colnames(x = BMP1st3))
+BMP1st3 <- RenameCells(object = BMP1st3, add.cell.id = "BMP1st3")
+head(x = colnames(x = BMP1st3))
+head(x = colnames(x = BMP2st3))
+BMP7st3 <- RenameCells(object = BMP2st3, add.cell.id = "BMP2st3")
+head(x = colnames(x = BMP2st3))
+head(x = colnames(x = BMP3st3))
+BMP3st3 <- RenameCells(object = BMP3st3, add.cell.id = "BMP3st3")
+head(x = colnames(x = BMP3st3))
+
+# Thresholding ####
+# RNA based cell thresholding
+# The operator can add columns to object metadata. This is a great place to stash QC stats
+
+BMP1st2[["percent.mt"]] <- PercentageFeatureSet(object = BMP1st2, pattern = "^MT-")
+BMP2st2[["percent.mt"]] <- PercentageFeatureSet(object = BMP2st2, pattern = "^MT-")
+BMP3st2[["percent.mt"]] <- PercentageFeatureSet(object = BMP3st2, pattern = "^MT-")
+p1 <- VlnPlot(object = BMP1st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p2 <- VlnPlot(object = BMP2st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p3 <- VlnPlot(object = BMP3st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p1, p2, p3), ncol =1)
+p4 <- FeatureScatter(object = BMP1st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p5 <- FeatureScatter(object = BMP1st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p6 <- FeatureScatter(object = BMP2st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p7 <- FeatureScatter(object = BMP2st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p8 <- FeatureScatter(object = BMP3st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p9 <- FeatureScatter(object = BMP3st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p4, p5, p6, p7, p8, p9), ncol =2)
+BMP1st2 <- subset(x = BMP1st2, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+BMP2st2 <- subset(x = BMP2st2, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+BMP3st2 <- subset(x = BMP3st2, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+p10 <- VlnPlot(object = BMP1st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p11 <- VlnPlot(object = BMP2st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p12 <- VlnPlot(object = BMP3st2, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p10, p11, p12), ncol =1)
+p13 <- FeatureScatter(object = BMP1st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p14 <- FeatureScatter(object = BMP1st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p15 <- FeatureScatter(object = BMP2st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p16 <- FeatureScatter(object = BMP2st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p17 <- FeatureScatter(object = BMP3st2, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p18 <- FeatureScatter(object = BMP3st2, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p13, p14, p15, p16, p17, p18), ncol =2)
+
+
+
+BMP1st3[["percent.mt"]] <- PercentageFeatureSet(object = BMP1st3, pattern = "^MT-")
+BMP2st3[["percent.mt"]] <- PercentageFeatureSet(object = BMP2st3, pattern = "^MT-")
+BMP3st3[["percent.mt"]] <- PercentageFeatureSet(object = BMP3st3, pattern = "^MT-")
+p1 <- VlnPlot(object = BMP1st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p2 <- VlnPlot(object = BMP2st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p3 <- VlnPlot(object = BMP3st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p1, p2, p3), ncol =1)
+p4 <- FeatureScatter(object = BMP1st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p5 <- FeatureScatter(object = BMP1st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p6 <- FeatureScatter(object = BMP2st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p7 <- FeatureScatter(object = BMP2st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p8 <- FeatureScatter(object = BMP3st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p9 <- FeatureScatter(object = BMP3st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p4, p5, p6, p7, p8, p9), ncol =2)
+BMP1st3 <- subset(x = BMP1st3, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+BMP2st3 <- subset(x = BMP2st3, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+BMP3st3 <- subset(x = BMP3st3, subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mt < 20)
+p10 <- VlnPlot(object = BMP1st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p11 <- VlnPlot(object = BMP2st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p12 <- VlnPlot(object = BMP3st3, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+CombinePlots(plots = list(p10, p11, p12), ncol =1)
+p13 <- FeatureScatter(object = BMP1st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p14 <- FeatureScatter(object = BMP1st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p15 <- FeatureScatter(object = BMP2st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p16 <- FeatureScatter(object = BMP2st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+p17 <- FeatureScatter(object = BMP3st3, feature1 = "nCount_RNA", feature2 = "percent.mt")
+p18 <- FeatureScatter(object = BMP3st3, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+CombinePlots(plots = list(p13, p14, p15, p16, p17, p18), ncol =2)
+
+# Merge Datasets
+# Based on comment to Issue #4753 https://github.com/satijalab/seurat/issues/4753
+# We use RPCA to yield conserved mapping
+BMPcomparison<- c(BMP1st2,BMP2st2,BMP3st2,BMP1st3,BMP2st3,BMP3st3)
+
+# normalize and identify variable features for each dataset independently
+BMPcomparison.list <- lapply(X = BMPcomparison, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 3000)
+})
+
+# select features that are repeatedly variable across datasets for integration run PCA on each
+# dataset using these features
+features <- SelectIntegrationFeatures(object.list = BMPcomparison.list)
+BMPcomparison.list <- lapply(X = BMPcomparison.list, FUN = function(x) {
+  x <- ScaleData(x, features = features, verbose = FALSE)
+  x <- RunPCA(x, features = features, verbose = FALSE)
+})
+
+# Perform integration
+BMPcomparison.anchors <- FindIntegrationAnchors(object.list = BMPcomparison.list, anchor.features = features, reduction = "rpca")
+BMPcomparison.combined <- IntegrateData(anchorset = BMPcomparison.anchors)
+
+# Run the standard workflow for visualization and clustering
+DefaultAssay(BMPcomparison.combined) <- "integrated"
+BMPcomparison.combined <- ScaleData(BMPcomparison.combined, verbose = FALSE)
+BMPcomparison.combined <- RunPCA(BMPcomparison.combined, npcs = 30, verbose = FALSE)
+BMPcomparison.combined <- RunUMAP(BMPcomparison.combined, reduction = "pca", dims = 1:30)
+BMPcomparison.combined <- FindNeighbors(BMPcomparison.combined, reduction = "pca", dims = 1:30)
+BMPcomparison.combined <- FindClusters(BMPcomparison.combined, resolution = 0.4)
+
+# Visualization
+p3 <- DimPlot(BMPcomparison.combined, reduction = "umap", raster = FALSE)
+p4 <- DimPlot(BMPcomparison.combined, reduction = "umap", label = TRUE,raster = FALSE,
+              repel = TRUE)
+p3 + p4
+
+# Linear dimensionality assessment
+
+DefaultAssay(object = BMPcomparison.combined)
+DefaultAssay(object = BMPcomparison.combined) <- "integrated"
+BMPcomparison.combined <- RunPCA(object = BMPcomparison.combined, features = VariableFeatures(object = BMPcomparison.combined))
+print(x = BMPcomparison.combined[["pca"]], dims = 1:5, nfeatures = 5)
+VizDimLoadings(object = BMPcomparison.combined, dims = 1:2, reduction = "pca")
+DimPlot(object = BMPcomparison.combined, reduction = "pca")
+DimHeatmap(object = BMPcomparison.combined, dims = 1, cells = 500, balanced = TRUE)
+DimHeatmap(object = BMPcomparison.combined, dims = 1:15, cells = 500, balanced = TRUE)
+ElbowPlot(object = BMPcomparison.combined)
+
+#CLUSTER ANALYSIS ####
+# Clustering, we run multiple permutations to allow clustree to analyze optimal clustering resolution.
+BMPcomparison.combined <- FindNeighbors(object = BMPcomparison.combined, dims = 1:20)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.1)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.2)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.3)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.4)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.5)
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.6)
+
+# Cluster-tree analysis, looking appropriate non-anomalous clustering resolutio
+clustree(BMPcomparison.combined, prefix = "integrated_snn_res.")
+BMPcomparison.combined <- FindClusters(object = BMPcomparison.combined, resolution = 0.4)
+
+# DATA-VISUALIZATION ####
+# note that you can set `label = TRUE` or use the LabelClusters function to help label
+# individual clusters
+
+BMPcomparison.combined <- RunUMAP(BMPcomparison.combined, dims = 1:30)
+p1010 <- DimPlot(object = BMPcomparison.combined, group.by = c("orig.ident", "integrated_snn_res.0.4"), combine = FALSE, pt.size = 1, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+
+BMPcomparison.combined <- RenameIdents(BMPcomparison.combined, `0` = "Acinar1", `1` = "Acinar2", `2` = "Ductal1_SPP1", `3` = "Ductal1_SPP1", `4` = "Acinar+Ductal", `5` = "Acinar1", `6` = "Acinar3", `7` = "Acinar4_OLFM4", `8` = "Ductal2", `9` = "Acinar5",`10` = "Stellate", `11` = "Progenitor like cells_TFF1", `12` = "Ductal2", `13` = "Macrophage", `14` = "Islets", `15` = "Endothelial cells", `16` = "Ductal4_SPP1")
+DimPlot(BMPcomparison.combined, label = TRUE, raster = FALSE)
+DimPlot(BMPcomparison.combined, label = FALSE, raster = FALSE)
+
+DimPlot(BMPcomparison.combined, reduction = "umap", 
+        cols =  c("darkgoldenrod2",
+                  "yellow3",
+                  "royalblue1",
+                  "greenyellow",
+                  "sienna3",
+                  "darkgoldenrod4",
+                  "navyblue",
+                  "darkgoldenrod3",
+                  "grey",
+                  "mediumseagreen", "pink", "red","palegreen2", "maroon2"
+        ),
+        pt.size = 1, raster = FALSE, label = TRUE)   
+
+BMPcomparison.combined$CellType <- Idents(BMPcomparison.combined)
+
+head(x = BMPcomparison.combined[[]])
+
+#Finding differentially expressed features (cluster biomarkers)
+
+BMPcomparison.combined.markers <- FindAllMarkers(BMPcomparison.combined, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.41)
+BMPcomparison.combined.markers %>%
+  group_by(CellType) %>%
+  slice_max(n = 2, order_by = avg_log2FC)
+
+write.csv(BMPcomparison.combined.markers, 'C:/Users/mad1188/Box/Mayur_shared_JDB/BMPmarkers_celltype.csv')
+
+
+#Renaming the clusters
+
+BMPcomparison.combinedUMAP <- RenameIdents(BMPcomparison.combined, `0` = "Acinar1", `1` = "Acinar2", `2` = "Ductal1_SPP1", `3` = "Ductal1_SPP1", `4` = "Acinar+Ductal", `5` = "Acinar1", `6` = "Acinar3", `7` = "Acinar4_OLFM4", `8` = "Ductal2", `9` = "Acinar5",`10` = "Stellate", `11` = "Progenitor like cells_TFF1", `12` = "Ductal2", `13` = "Macrophage", `14` = "Islets", `15` = "Endothelial cells", `16` = "Ductal4_SPP1")
+DimPlot(BMPcomparison.combinedUMAP, label = TRUE, raster = FALSE)
+DimPlot(BMPcomparison.combinedUMAP, label = FALSE, raster = FALSE)
+
+DimPlot(BMPcomparison.combinedUMAP, reduction = "umap", 
+        cols =  c("darkgoldenrod2",
+                  "yellow3",
+                  "royalblue1",
+                  "greenyellow",
+                  "sienna3",
+                  "darkgoldenrod4",
+                  "navyblue",
+                  "darkgoldenrod3",
+                  "grey",
+                  "mediumseagreen", "pink", "red","palegreen2", "maroon2"
+        ),
+        pt.size = 1, raster = FALSE, label = TRUE)   
+  
+BMPcomparison.combinedUMAP2 <- RenameIdents(BMPcomparison.combinedUMAP, `Ductal1_SPP1` = "D1", `Progenitor like cells_TFF1` = "D2",`Ductal2` = "D3", `Ductal4_SPP1` = "D4", `Acinar5` = "A1", `Acinar+Ductal` = "A2",`Acinar1` = "A3", `Acinar4_OLFM4` = "A3.1",`Acinar2` = "A5",  `Acinar3` = "A7", `Macrophage` = "M", `Islets` = "I", `Endothelial cells` = "E", `Stellate` = "S" )
+DimPlot(BMPcomparison.combinedUMAP2, label = TRUE, raster = FALSE)
+DimPlot(BMPcomparison.combinedUMAP2, label = FALSE, raster = FALSE)
+
+DimPlot(BMPcomparison.combinedUMAP2, reduction = "umap", 
+        cols =  c("turquoise1",
+                  "mediumseagreen",
+                  "royalblue1",
+                  "lightslateblue",
+                  "lightgoldenrod2",
+                  "sienna3",
+                  "yellow3",
+                  "CORAL2",
+                  "YELLOW",
+                  "GOLD3",
+                   "pink", "red","palegreen2","grey"
+        ),
+        pt.size = 1, raster = FALSE, label = FALSE)  
+  
+  
+saveRDS(BMPcomparison.combinedUMAP2, file = "C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN ONLY-DO NOT TOUCH/Mayur last/Materials and Methods/BMP7_TimePoint_1+TimePoint_2.rds")
+  
