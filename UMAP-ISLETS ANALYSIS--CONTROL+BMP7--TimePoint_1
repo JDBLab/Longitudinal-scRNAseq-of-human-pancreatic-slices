@@ -1,1 +1,144 @@
+# subset islets
+ISLETST2 <- subset(DiabetesST2UMAP.combined_AD, idents = c("I"))
+
+p1010 <- DimPlot(object = ISLETST2, group.by = c("orig.ident", "integrated_snn_res.0.4"), combine = FALSE, pt.size = 1, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+
+p1010 <- DimPlot(object = ISLETST2, group.by = c("groups", "integrated_snn_res.0.4"), combine = FALSE, pt.size = 1, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+
+table(Idents(ISLETST2), ISLETST2$groups)
+
+DefaultAssay(object = ISLETST2) <- "RNA"
+
+DefaultAssay(object = ISLETST2) <- "Integrated"
+ISLETST2<- NormalizeData(ISLETST2)
+
+FeaturePlot(ISLETST2, features = c("CRP", "TFF1", "TFF2", "INS", "SPP1"))
+
+FeaturePlot(ISLETST2, features = c("PDX1", "ISL1", "GCG", "INS", "SST", "PPY", "BMPR1A"))
+
+FeaturePlot(ISLETST2, features = c("PDX1", "INS","BMPR1A"))
+
+FeaturePlot(ISLETST2, features = c("NEUROG3"))
+FeaturePlot(ISLETST2, features = c("PCSK1", "PCSK2"))
+
+FeaturePlot(ISLETST2, features = c("UCN3", "MAFA", "NEUROD1", "NKX6-1","NKX6-2"))
+
+FeaturePlot(ISLETST2, features = c( "NEUROD1"))
+
+plot <- FeaturePlot(ISLETST2, features = "INS")
+HoverLocator(plot = plot, information = FetchData(ISLETST2, vars = c("groups", "nCount_RNA", "I.CELLS")))
+select.cells <- CellSelector(plot = plot)
+head(select.cells)
+Idents(ISLETST2, cells = select.cells) <- "Islets_Island1"
+table(select.cells)
+write.csv(select.cells, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/ST2_Islets_Island1.csv')
+
+
+select.cells1 <- CellSelector(plot = plot)
+head(select.cells1)
+Idents(ISLETST2, cells = select.cells1) <- "Islets_Island2"
+write.csv(select.cells1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/ST2_Islets_Island2.csv')
+
+---------------------------------------------------------------------------------------------------------------
+# Not required and not working
+Islets_Island1 <- select.cells
+Islets_Island2 <- select.cells1
+Idents(ISLETST2, cells = select.cells) <- ISLETST2$Islets_Island1 
+Idents(ISLETST2, cells = select.cells1)<- ISLETST2$Islets_Island2 
+  ---------------------------------------------------------------------------------------------------------------
+DefaultAssay(object = ISLETST2) <- "RNA"
+ISLETST2<- NormalizeData(ISLETST2)
+ISLETST2 <- SCTransform(ISLETST2, assay = "RNA", new.assay.name = "SCT", verbose = TRUE, return.only.var.genes = TRUE)
+DefaultAssay(object = ISLETST2) <- "SCT"
+
+ISLETST2 <- PrepSCTFindMarkers(ISLETST2)
+
+ST2_Islets_subclusters<- FindMarkers(ISLETST2, assay = "SCT",
+                     ident.1 = "Islets_Island1", ident.2 = "Islets_Island2",
+                     slot = "counts", test.use = "wilcox",
+                     logfc.threshold = 0,
+                     psudocount.use = 1,
+                     verbose = TRUE)
+head(ST2_Islets_subclusters, n = 15)
+write.csv(ST2_Islets_subclusters, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/ST2_Islets_subclusters.csv')
+
+Islets_Island1.markers <- FindMarkers(ISLETST2, ident.1 = "Islets_Island1", min.pct = 0.25)
+head(Islets_Island1.markers, n = 5)
+write.csv(Islets_Island1.markers, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/Islets_Island1.markers.csv')
+
+Islets_Island2.markers <- FindMarkers(ISLETST2, ident.1 = "Islets_Island2", min.pct = 0.25)
+head(Islets_Island2.markers, n = 5)
+write.csv(Islets_Island2.markers, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/New UMAP identities/ST2 VELOCYTO NEW/Islets_Island2.markers.csv')
+
+DiabetesST2UMAP.combined_AD$integrated_snn_res.0.2<- Idents(ISLETST2RE)
+
+ISLETST2RE$integrated_snn_res.0.2<- Idents(ISLETST2RE)
+
+ISLETST2$Islets_Island<- Idents(ISLETST2)
+
+ISLETST2$Islet_subcluster <- Idents(Islets_Island)
+
+ISLETST2$I.CELLS <- Cells(ISLETST2)
+
+ISLETST2$NEW_I2_CellType <- Idents(ISLETST2RE)
+
+head(x = ISLETST2[[]])
+
+write.csv(ISLETST2@meta.data, file='ISLETST222.csv', quote=T, row.names=T)
+
+table(ISLETST2$orig.ident,ISLETST2$groups,ISLETST2$I.CELLS)
+
+
+DefaultAssay(object = ISLETST2)
+DefaultAssay(object = ISLETST2) <- "integrated"
+ISLETST2 <- RunPCA(object = ISLETST2, features = VariableFeatures(object = ISLETST2))
+print(x = ISLETST2[["pca"]], dims = 1:5, nfeatures = 5)
+VizDimLoadings(object = ISLETST2, dims = 1:2, reduction = "pca")
+DimPlot(object = ISLETST2, reduction = "pca")
+DimHeatmap(object = ISLETST2, dims = 1, cells = 500, balanced = TRUE)
+DimHeatmap(object = ISLETST2, dims = 1:15, cells = 500, balanced = TRUE)
+ElbowPlot(object = ISLETST2)
+ISLETST2 <- FindNeighbors(object = ISLETST2, dims = 1:20)
+
+ISLETST2RE <- FindClusters(object = ISLETST2, resolution = 0.2)
+
+table(ISLETST2RE$seurat_clusters)
+table(Idents(ISLETST2RE), ISLETST2RE$orig.ident,ISLETST2RE$groups, ISLETST2RE$nCount_RNA, ISLETST2RE$I.CELLS)
+ISLETST2RE <- RunUMAP(ISLETST2RE, dims = 1:30)
+p1010 <- DimPlot(object = ISLETST2RE, group.by = c("orig.ident", "integrated_snn_res.0.2"), combine = FALSE, pt.size = 1, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+p1010 <- DimPlot(object = ISLETST2RE, group.by = c("groups", "integrated_snn_res.0.2", "Islets_Island1" ), combine = FALSE, pt.size = 1, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+
+p1010 <- DimPlot(object = ISLETST2RE, group.by = c("orig.ident"), combine = FALSE, pt.size = 5, raster = FALSE, label = FALSE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 5))))
+CombinePlots(p1010)
+
+DefaultAssay(object = ISLETST2RE) <- "integrated"
+
+DimPlot(ISLETST2RE, reduction = "umap", 
+        cols =  c("navyblue","salmon1", "grey"),group.by ="Islets_Island1" ,
+        pt.size = 5, raster = FALSE, label = FALSE)  
+
+DimPlot(ISLETST2RE, reduction = "umap", 
+cols =  c("maroon2","yellow3"),group.by ="groups" ,
+         pt.size = 5, raster = FALSE, label = FALSE)
+
+DimPlot(ISLETST2RE, reduction = "umap", 
+        cols =  c("orange","violet", "green"),group.by ="integrated_snn_res.0.2" ,
+        pt.size = 5, raster = FALSE, label = FALSE)
+
+p1010 <- DimPlot(object = ISLETST2RE, group.by = c("groups", "integrated_snn_res.0.2" ), combine = FALSE, pt.size = 5, raster = FALSE, label = TRUE)
+p1010 <- lapply(X = p1010, FUN = function(x) x + theme(legend.position = "top") + guides(color = guide_legend(nrow = 3, byrow = TRUE, override.aes = list(size = 3))))
+CombinePlots(p1010)
+
+head(x = ISLETST2RE[[]])
+
+write.csv(ISLETST2RE@meta.data, file='ISLETST2RE.csv', quote=T, row.names=T)
 
