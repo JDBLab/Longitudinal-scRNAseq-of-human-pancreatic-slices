@@ -6,5 +6,285 @@ The code which we used for the following procedure are adptated from the followi
    scVelo is developed by Bergen et al. (Nature Biotechnology, 2020). We followed documentation for the analysis- https://scvelo.readthedocs.io/en/stable/getting_started/
    © Copyright 2022, Volker Bergen Revision ce52f584.
   ii) In order to generate loom files, we utilized guide developed by Basil Khuder- https://github.com/basilkhuder/Seurat-to-RNA-Velocity
-  iii) RNA velocity is analyzed by the Python package scVelo. We also followed tutorial given by Sam Morabito - https://smorabit.github.io/tutorials/8_velocyto/
-  iv) PAGA (partition-based graph abstraction)- For mapping out the coarse-grained connectivity structures of complex manifolds (Genome Biology, 2019).
+  iii) velocyto  is a package for the analysis of expression dynamics in single cell RNA seq data. In particular, it enables estimations of RNA velocities of single cells by distinguishing unspliced and spliced mRNAs in standard single-cell RNA sequencing protocols.We followed the documentation - http://velocyto.org/velocyto.py/
+  iv) RNA velocity is analyzed by the Python package scVelo. We also followed tutorial given by Sam Morabito - https://smorabit.github.io/tutorials/8_velocyto/
+  v) PAGA (partition-based graph abstraction)- For mapping out the coarse-grained connectivity structures of complex manifolds (Genome Biology, 2019).
+
+Pleasd find below step-by-step procedure
+1. Velocyto (linux based code)
+Installation
+Velocyto can be installed through pip.
+
+#Download dependencies first
+conda install numpy scipy cython numba matplotlib scikit-learn h5py click pip install velocyto
+
+#In order to make loom files, we used BAM file, human genome annotation.gtf, and filtered_barcodes.tsv  
+
+velocyto run -b filtered_barcodes.tsv -o output_path bam_file.bam annotation.gtf
+
+2. Seurat (R package) 
+We created SeuratObject and then used the following code to generate genenames file, netadata file and pca file. 
+The following is an example for Control+BMP7- TimePoint 1
+
+DiabetesST2.combined$barcode <- colnames(DiabetesST2.combined)
+DiabetesST2.combined$UMAP_1 <- DiabetesST2.combined@reductions$umap@cell.embeddings[,1]
+DiabetesST2.combined$UMAP_2 <- DiabetesST2.combined@reductions$umap@cell.embeddings[,2]
+write.csv(DiabetesST2.combined@meta.data, file='metadata.csv', quote=F, row.names=F)
+
+DefaultAssay(object = DiabetesST2.combined) <- "RNA"
+DiabetesST2.combined <- NormalizeData(DiabetesST2.combined)
+DiabetesST2.combined <- SCTransform(DiabetesST2.combined, assay = "RNA", new.assay.name = "SCT", verbose = TRUE, return.only.var.genes = TRUE)
+
+
+out_data_dir="C:/Users/mad1188/Box/Diabetes_new/For Velocyto controls mapped with BMP7/stage2"
+# write expression counts matrix
+library(Matrix)
+counts_matrix <- GetAssayData(DiabetesST2.combined, assay='RNA', slot='counts')
+writeMM(counts_matrix, file=paste0(out_data_dir, 'counts.mtx'))
+
+# write dimesnionality reduction matrix, in this example case pca matrix
+write.csv(DiabetesST2.combined@reductions$pca@cell.embeddings, file='pca.csv', quote=F,row.names=F)
+
+# write gene names
+write.table(
+  data.frame('gene'=rownames(counts_matrix)),file='gene_names.csv', quote=F,row.names=F,col.names=F)
+
+# The following codes we ran on Python 3.7 Jupyter notebook with Numpy and Scipy installed on Triton server-https://idsc.miami.edu/
+
+import scanpy as sc
+import anndata
+from scipy import io
+from scipy.sparse import coo_matrix, csr_matrix
+import numpy as np
+import os
+import pandas as pd
+
+# load sparse matrix:
+X = io.mmread("counts.mtx")
+
+# create anndata object
+adata = anndata.AnnData(
+    X=X.transpose().tocsr()
+)
+
+# load cell metadata:
+cell_meta = pd.read_csv("metadata.csv")
+
+# load gene names:
+with open("gene_names.csv", 'r') as f:
+    gene_names = f.read().splitlines()
+
+# set anndata observations and index obs by barcodes, var by gene names
+adata.obs = cell_meta
+adata.obs.index = adata.obs['barcode']
+adata.var.index = gene_names
+
+# load dimensional reduction:
+pca = pd.read_csv("pca.csv")
+pca.index = adata.obs.index
+
+# set pca and umap
+adata.obsm['X_pca'] = pca.to_numpy()
+adata.obsm['X_umap'] = np.vstack((adata.obs['UMAP_1'].to_numpy(), adata.obs['UMAP_2'].to_numpy())).T
+
+# plot a UMAP colored by sampleID to test:
+sc.pl.umap(adata, color=['SampleID'], frameon=False, save=True)
+
+# save dataset as anndata format
+adata.write('my_data.h5ad')
+
+# reload dataset
+adata = sc.read_h5ad('my_data.h5ad')
+
+import scvelo as scv
+import scanpy as sc
+import cellrank as cr
+import numpy as np
+import pandas as pd
+import anndata as ad
+
+scv.settings.verbosity = 3
+scv.settings.set_figure_params('scvelo', facecolor='white', dpi=100, frameon=False)
+cr.settings.verbosity = 2
+adata = sc.read_h5ad('my_data.h5ad')
+# load loom files for spliced/unspliced matrices for each sample:
+ldata1 = scv.read('Sample1.loom', cache=True)
+ldata2 = scv.read('Sample2.loom', cache=True)
+ldata3 = scv.read('Sample3.loom', cache=True)
+Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+Variable names are not unique. To make them unique, call `.var_names_make_unique`.
+# rename barcodes in order to merge:
+barcodes = [bc.split(':')[1] for bc in ldata1.obs.index.tolist()]
+barcodes = [bc[0:len(bc)-1] + '_10' for bc in barcodes]
+ldata1.obs.index = barcodes
+
+barcodes = [bc.split(':')[1] for bc in ldata2.obs.index.tolist()]
+barcodes = [bc[0:len(bc)-1] + '_11' for bc in barcodes]
+ldata2.obs.index = barcodes
+
+barcodes = [bc.split(':')[1] for bc in ldata3.obs.index.tolist()]
+barcodes = [bc[0:len(bc)-1] + '_9' for bc in barcodes]
+ldata3.obs.index = barcodes
+
+# make variable names unique
+ldata1.var_names_make_unique()
+ldata2.var_names_make_unique()
+ldata3.var_names_make_unique()
+# concatenate the three loom
+ldata = ldata1.concatenate([ldata2, ldata3])
+# merge matrices into the original adata object
+adata = scv.utils.merge(adata, ldata)
+# plot umap to check
+sc.pl.umap(adata, color='celltype', frameon=False, legend_loc='on data', title='', save='_celltypes.pdf')
+
+
+###### For Stochastic modeling #########
+# pre-process
+scv.pp.filter_and_normalize(adata)
+scv.pp.moments(adata)
+WARNING: Did not normalize X as it looks processed already. To enforce normalization, set `enforce=True`.
+Normalized count data: spliced, unspliced.
+WARNING: Did not modify X as it looks preprocessed already.
+computing neighbors
+    finished (0:00:14) --> added
+    'distances' and 'connectivities', weighted adjacency matrices (adata.obsp)
+computing moments based on connectivities
+    finished (0:00:17) --> added
+    'Ms' and 'Mu', moments of un/spliced abundances (adata.layers)
+    
+    # compute velocity
+scv.tl.velocity(adata, mode='stochastic')
+scv.tl.velocity_graph(adata)
+computing velocities
+    finished (0:01:15) --> added
+    'velocity', velocity vectors for each individual cell (adata.layers)
+computing velocity graph
+    finished (0:15:00) --> added
+    'velocity_graph', sparse matrix with cosine correlations (adata.uns)
+Part 2.1: Visualize velocity fields
+We can get a broad visualiztion of RNA velocity across all genes and all cells by visualizing a vector field on top of the 2D dimensional reduction.
+
+scv.pl.velocity_embedding(adata, basis='umap', frameon=False, save='embedding.pdf')
+computing velocity embedding
+    finished (0:00:06) --> added
+    'velocity_umap', embedded velocity vectors (adata.obsm)
+saving figure to file ./figures/scvelo_embedding.pdf
+
+scv.pl.velocity_embedding_grid(adata, basis='umap', color='celltype', save='embedding_grid.pdf', title='', scale=0.25)
+scv.pl.velocity_embedding_stream(adata, basis='umap', color=['celltype', 'condition'], save='embedding_stream.pdf', title='')
+
+scv.tl.rank_velocity_genes(adata, groupby='celltype', min_corr=.3)
+
+df = scv.DataFrame(adata.uns['rank_velocity_genes']['names'])
+df.head()
+ranking velocity genes
+    finished (0:00:23) --> added
+    'rank_velocity_genes', sorted scores by group ids (adata.uns)
+    'spearmans_score', spearmans correlation scores (adata.var)
+    
+    kwargs = dict(frameon=False, size=10, linewidth=1.5,
+              add_outline='AF6, AF1')
+
+scv.pl.scatter(adata, df['AF6'][:3], ylabel='AF6', frameon=False, color='celltype', size=10, linewidth=1.5)
+scv.pl.scatter(adata, df['AF1'][:3], ylabel='AF1', frameon=False, color='celltype', size=10, linewidth=1.5)
+
+scv.tl.velocity_confidence(adata)
+keys = 'velocity_length', 'velocity_confidence'
+scv.pl.scatter(adata, c=keys, cmap='coolwarm', perc=[5, 95])
+--> added 'velocity_length' (adata.obs)
+--> added 'velocity_confidence' (adata.obs)
+
+x, y = scv.utils.get_cell_transitions(adata, basis='umap', starting_cell=70)
+ax = scv.pl.velocity_graph(adata, c='lightgrey', edge_width=.05, show=False)
+ax = scv.pl.scatter(adata, x=x, y=y, s=120, c='ascending', cmap='gnuplot', ax=ax)
+scv.tl.velocity_pseudotime(adata)
+scv.pl.scatter(adata, color='velocity_pseudotime', cmap='gnuplot')
+# this is needed due to a current bug - bugfix is coming soon.
+adata.uns['neighbors']['distances'] = adata.obsp['distances']
+adata.uns['neighbors']['connectivities'] = adata.obsp['connectivities']
+scv.tl.paga(adata, groups='celltype')
+df = scv.get_df(adata, 'paga/transitions_confidence', precision=2).T
+#df.style.background_gradient(cmap='Blues').format('{:.2g}')
+running PAGA using priors: ['velocity_pseudotime']
+    finished (0:00:04) --> added
+    'paga/connectivities', connectivities adjacency (adata.uns)
+    'paga/connectivities_tree', connectivities subtree (adata.uns)
+    'paga/transitions_confidence', velocity transitions (adata.uns)
+scv.pl.paga(adata, basis='umap', size=50, alpha=.1,
+            min_edge_width=2, node_size_scale=1.5)
+
+
+###### For Dynamic modeling #########
+
+scv.pp.filter_and_normalize(adata_subset)
+scv.pp.moments(adata_subset)
+WARNING: Did not normalize X as it looks processed already. To enforce normalization, set `enforce=True`.
+WARNING: Did not normalize spliced as it looks processed already. To enforce normalization, set `enforce=True`.
+WARNING: Did not normalize unspliced as it looks processed already. To enforce normalization, set `enforce=True`.
+WARNING: Did not modify X as it looks preprocessed already.
+computing neighbors
+    finished (0:00:03) --> added
+    'distances' and 'connectivities', weighted adjacency matrices (adata.obsp)
+computing moments based on connectivities
+    finished (0:00:11) --> added
+    'Ms' and 'Mu', moments of un/spliced abundances (adata.layers)
+computing velocities
+    finished (0:00:31) --> added
+    'velocity', velocity vectors for each individual cell (adata.layers)
+computing velocity graph
+    finished (0:04:00) --> added
+    'velocity_graph', sparse matrix with cosine correlations (adata.uns)
+    
+    scv.tl.recover_dynamics(adata_subset)
+recovering dynamics
+    finished (0:55:01) --> added
+    'fit_pars', fitted parameters for splicing dynamics (adata.var)
+scv.tl.velocity(adata_subset, mode='dynamical')
+scv.tl.velocity_graph(adata_subset)
+computing velocities
+    finished (0:01:54) --> added
+    'velocity', velocity vectors for each individual cell (adata.layers)
+computing velocity graph
+    finished (0:01:37) --> added
+    'velocity_graph', sparse matrix with cosine correlations (adata.uns)
+scv.pl.velocity_embedding_stream(adata_subset, basis='umap', color=['celltype', 'condition'], save='embedding_graph'
+
+df = adata_subset.var
+df = df[(df['fit_likelihood'] > .1) & df['velocity_genes'] == True]
+
+kwargs = dict(xscale='log', fontsize=16)
+with scv.GridSpec(ncols=3) as pl:
+    pl.hist(df['fit_alpha'], xlabel='transcription rate', **kwargs)
+    pl.hist(df['fit_beta'] * df['fit_scaling'], xlabel='splicing rate', xticks=[.1, .4, 1], **kwargs)
+    pl.hist(df['fit_gamma'], xlabel='degradation rate', xticks=[.1, .4, 1], **kwargs)
+
+scv.get_df(adata_subset, 'fit*', dropna=True).head()
+
+scv.tl.latent_time(adata_subset)
+scv.pl.scatter(adata_subset, color='latent_time', color_map='gnuplot', size=80)
+computing latent time using root_cells as prior
+    finished (0:00:48) --> added
+    'latent_time', shared time (adata.obs)
+    
+    top_genes = adata_subset.var['fit_likelihood'].sort_values(ascending=False).index[:300]
+scv.pl.heatmap(adata_subset, var_names=top_genes, sortby='latent_time', col_color='celltype', n_convolve=100)
+
+top_genes = adata_subset.var['fit_likelihood'].sort_values(ascending=False).index
+scv.pl.scatter(adata_subset, color='celltype', basis=top_genes[:15], ncols=5, frameon=False)
+
+scv.tl.recover_latent_time(adata, root_key="initial_states_probs", end_key="terminal_states_probs")    # recover latent time by using the CellRank determined initial states and terminal states
+
+scv.tl.paga(adata, groups="seurat_clusters", root_key="initial_states_probs", end_key="terminal_states_probs", use_time_prior="latent_time")    # combine the latent-time with the CellRank determined initial states and terminal states to calculate PAGA
+
+
+# this is needed due to a current bug - bugfix is coming soon.
+adata.uns['neighbors']['distances'] = adata.obsp['distances']
+adata.uns['neighbors']['connectivities'] = adata.obsp['connectivities']
+scv.tl.paga(adata, groups="seurat_clusters", root_key="initial_states_probs", end_key="terminal_states_probs", use_time_prior="latent_time")    # combine the latent-time with the CellRank determined initial states and terminal states to calculate PAGA
+df = scv.get_df(adata, 'paga/transitions_confidence', precision=2).T
+#df.style.background_gradient(cmap='Blues').format('{:.2g}')
+
+
+scv.tl.paga(adata, groups='seurat_clusters', vkey='velocity', use_time_prior='latent_time')
+scv.pl.paga(adata, basis='umap', vkey='velocity', node_size_scale=1.5, min_edge_width=2, use_raw=True, size=50, alpha=0.1)
