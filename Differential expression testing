@@ -1,0 +1,226 @@
+Perform default differential expression tests
+The bulk of Seurat’s differential expression features can be accessed through the FindMarkers() function. As a default, Seurat performs differential expression based on the non-parametric Wilcoxon rank sum test. This replaces the previous default test (‘bimod’). To test for differential expression between two specific groups of cells, specify the ident.1 and ident.2 parameters.
+
+# DE analysis using seurat vignnette
+  
+  DefaultAssay(object = DiabetesST2UMAP.combined) <- "RNA"
+DiabetesST2UMAP.combined <- NormalizeData(DiabetesST2UMAP.combined)
+DiabetesST2UMAP.combined <- SCTransform(DiabetesST2UMAP.combined, assay = "RNA", new.assay.name = "SCT", verbose = TRUE, return.only.var.genes = TRUE)
+DefaultAssay(object = DiabetesST2UMAP.combined) <- "SCT"
+DefaultAssay(object = DiabetesST2UMAP.combined) <- "Integrated"
+
+  head(x = DiabetesST2UMAP.combined[[]])
+Idents(DiabetesST2UMAP.combined) <- "groups"
+DiabetesST2UMAP.combined$groups.cell <- paste(Idents(DiabetesST2UMAP.combined), DiabetesST2UMAP.combined$CellType, sep = "_")
+Idents(DiabetesST2UMAP.combined) <- "groups.cell"
+
+table(Idents(DiabetesST2UMAP.combined))
+
+Idents(DiabetesST2UMAP.combined) <- "CellType"
+
+table(Idents(DiabetesST2UMAP.combined))
+
+DiabetesST2UMAP.combined <- PrepSCTFindMarkers(DiabetesST2UMAP.combined)
+
+# DE analysis using seurat vignnette
+
+head(x = DiabetesST2UMAP.combined[[]])
+Idents(DiabetesST2UMAP.combined) <- "groups"
+DiabetesST2UMAP.combined$groups.cell <- paste(Idents(DiabetesST2UMAP.combined), DiabetesST2UMAP.combined$CellType, sep = "_")
+Idents(DiabetesST2UMAP.combined) <- "groups.cell"
+
+table(Idents(DiabetesST2UMAP.combined))
+
+Idents(DiabetesST2UMAP.combined) <- "CellType"
+
+table(Idents(DiabetesST2UMAP.combined))
+
+DiabetesST2UMAP.combined <- PrepSCTFindMarkers(DiabetesST2UMAP.combined)
+ST2_A5 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_A5", ident.2 = "ctrlST2_A5",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A5, n = 15)
+write.csv(ST2_A5, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A5.csv')
+
+
+ST2_D1 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D1", ident.2 = "ctrlST2_D1",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D1, n = 15)
+write.csv(ST2_D1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_D1.csv')
+
+ST2_D2 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D2", ident.2 = "ctrlST2_D2",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D2, n = 15)
+write.csv(ST2_D2, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_D2.csv')
+
+ST2_D3 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D3", ident.2 = "ctrlST2_D3",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D3, n = 15)
+write.csv(ST2_D3, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_D3.csv')
+
+ST2_D4 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D4", ident.2 = "ctrlST2_D4",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D4, n = 15)
+write.csv(ST2_D4, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_D4.csv')
+
+ST2_A1 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_A1", ident.2 = "ctrlST2_A1",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A1, n = 15)
+write.csv(ST2_A1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A1.csv')
+
+
+ST2_A2 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_A2", ident.2 = "ctrlST2_A2",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A2, n = 15)
+write.csv(ST2_A2, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A2.csv')
+
+
+ST2_A2.1 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                        ident.1 = "BMP7ST2_A2.1", ident.2 = "ctrlST2_A2.1",
+                        slot = "counts", test.use = "wilcox",
+                        logfc.threshold = 0,
+                        psudocount.use = 1,
+                        verbose = TRUE)
+head(ST2_A2.1, n = 15)
+write.csv(ST2_A2.1, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A2.1.csv')
+
+ST2_A4 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_A4", ident.2 = "ctrlST2_A4",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A4, n = 15)
+write.csv(ST2_A4, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A4.csv')
+
+ST2_A5 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_A5", ident.2 = "ctrlST2_A5",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A5, n = 15)
+write.csv(ST2_A5, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A5.csv')
+
+ST2_A7 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_A7", ident.2 = "ctrlST2_A7",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A7, n = 15)
+write.csv(ST2_A7, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_A7.csv')
+
+
+ST2_D7 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D7", ident.2 = "ctrlST2_D7",
+                      slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D7, n = 15)
+write.csv(ST2_D7, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_D7.csv')
+
+ST2_D6 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D6", ident.2 = "ctrlST2_D6",
+                      slot = "SCT", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D6, n = 15)
+write.csv(ST2_D6, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_D6.csv')
+
+ST2_DX <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_DX", ident.2 = "ctrlST2_DX",
+                      slot = "SCT", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_DX, n = 15)
+write.csv(ST2_DX, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_DX.csv')
+
+ST2_I <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                     ident.1 = "BMP7ST2_I", ident.2 = "ctrlST2_I",
+                     slot = "counts", test.use = "wilcox",
+                     logfc.threshold = 0,
+                     psudocount.use = 1,
+                     verbose = TRUE)
+head(ST2_I, n = 15)
+write.csv(ST2_I, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_I.csv')
+
+ST2_E <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                     ident.1 = "BMP7ST2_E", ident.2 = "ctrlST2_E",
+                     slot = "counts", test.use = "wilcox",
+                     logfc.threshold = 0,
+                     psudocount.use = 1,
+                     verbose = TRUE)
+head(ST2_E, n = 15)
+write.csv(ST2_E, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_E.csv')
+
+ST2_M <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                     ident.1 = "BMP7ST2_M", ident.2 = "ctrlST2_M",
+                     slot = "counts", test.use = "wilcox",
+                     logfc.threshold = 0,
+                     psudocount.use = 1,
+                     verbose = TRUE)
+head(ST2_M, n = 15)
+write.csv(ST2_M, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_M.csv')
+
+ST2_S <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                     ident.1 = "BMP7ST2_S", ident.2 = "ctrlST2_S",
+                     slot = "counts", test.use = "wilcox",
+                     logfc.threshold = 0,
+                     psudocount.use = 1,
+                     verbose = TRUE)
+head(ST2_S, n = 15)
+write.csv(ST2_S, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN UPDATED/control and BMP stage-2 combined/ST2_S.csv')
+
+
+
+ST2_A5 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT", 
+                      ident.1 = "BMP7ST2_A5", ident.2 = "ctrlST2_A5",
+                       slot = "counts", test.use = "wilcox",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_A5, n = 15)
+
+
+DiabetesST2UMAP.combined <- FetchData(object = DiabetesST2UMAP.combined, vars = "ID3")
+
+sd(DiabetesST2UMAP.combined$ID3)
+ST2_D6 <- FindMarkers(DiabetesST2UMAP.combined, assay = "SCT",
+                      ident.1 = "BMP7ST2_D6", ident.2 = "ctrlST2_D6",
+                      test.use = "LR",
+                      logfc.threshold = 0,
+                      psudocount.use = 1,
+                      verbose = TRUE)
+head(ST2_D6, n = 15)
+write.csv(ST2_D6, 'C:/Users/mad1188/Box/Mayur_shared_JDB/JUAN ONLY-DO NOT TOUCH/Mayur last/only D6 gene expression/LR.csv')
