@@ -23,7 +23,7 @@ conda install numpy scipy cython numba matplotlib scikit-learn h5py click pip in
 velocyto run -b filtered_barcodes.tsv -o output_path bam_file.bam annotation.gtf
 
 2. Seurat (R package) 
-We created SeuratObject and then used the following code to generate genenames file, netadata file and pca file. 
+We created SeuratObject and then used the following code to generate genenames file, metadata file and pca file. 
 The following is an example for Control+BMP7- TimePoint 1
 
 DiabetesST2.combined$barcode <- colnames(DiabetesST2.combined)
