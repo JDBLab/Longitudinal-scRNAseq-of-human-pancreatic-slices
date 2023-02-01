@@ -38,36 +38,37 @@ RTools v3.3.X
 
 Computing environment
 -----------------------
-Hardware and OS environment for running Cellranger
-Environment 1
-Processor: Intel Sandy Bridge E5-2670 (16cores x 16 threads)
-RAM: 25GB
-OS: CentOS 6.5
-Environment 2
-Hardware integrated into the Pegasus Supercomputing array at the University of Miami
-Hardware and OS environment for running Seurat 
-Analysis was performed/replicated on each of these computing systems, and ran optimally.
+Hardware and OS environment for running Cellranger    
+Environment 1  
+Processor: Intel Sandy Bridge E5-2670 (16cores x 16 threads)    
+RAM: 25GB   
+OS: CentOS 6.5    
+Environment 2   
 
-Processor	Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz   2.10 GHz
-Installed RAM	96.0 GB (94.6 GB usable)
-System type	64-bit operating system, x64-based processor
-Edition	Windows 10 Enterprise
-OS build	19044.2486
-Experience	Windows Feature Experience Pack 120.2212.4190.0
+Hardware and OS environment for running Seurat     
+Analysis was performed/replicated on each of these computing systems, and ran optimally.  
 
-Hardware and OS environment for running RNA velcoty- scVelo and Velocyto
-IBM Power9/Nvidia Volta – 6 Racks
-IBM declustered storage – 2 Racks
-96 IBM Power 9 servers
-30TB RAM (256/node)
-64 bit scalar
-400 TB shared home
-2 @ 1.99 TB ssd local storage
-IPython             8.4.0
-jupyter_client      7.3.5
-jupyter_core        4.11.1
-Python 3.9.12 | packaged by conda-forge | (main, Mar 24 2022, 23:25:27) [GCC 10.3.0]
-Linux-4.14.0-115.el7a.ppc64le-ppc64le-with-glibc2.17
+Processor	Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz   2.10 GHz  
+Installed RAM	96.0 GB (94.6 GB usable)  
+System type	64-bit operating system, x64-based processor  
+Edition	Windows 10 Enterprise 
+OS build	19044.2486  
+Experience	Windows Feature Experience Pack 120.2212.4190.0 
+
+Hardware integrated into the Triton Supercomputing array at the University of Miami   
+Hardware and OS environment for running RNA velcoty- scVelo and Velocyto  
+IBM Power9/Nvidia Volta – 6 Racks 
+IBM declustered storage – 2 Racks 
+96 IBM Power 9 servers  
+30TB RAM (256/node) 
+64 bit scalar 
+400 TB shared home  
+2 @ 1.99 TB ssd local storage 
+IPython             8.4.0 
+jupyter_client      7.3.5 
+jupyter_core        4.11.1  
+Python 3.9.12 | packaged by conda-forge | (main, Mar 24 2022, 23:25:27) [GCC 10.3.0]  
+Linux-4.14.0-115.el7a.ppc64le-ppc64le-with-glibc2.17  
 
 Contributors
 ------------------
