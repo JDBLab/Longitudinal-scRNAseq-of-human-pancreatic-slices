@@ -30,8 +30,8 @@ Preliminary data-analyses involving n=3 for each of 4 groups de-identified Longi
 
 Analysis and visualization programs
 --------------------------------------------
-Cellranger software from 10X Genomics:Cellranger
-R and R's integrated developmental environment RStudio:
+Cellranger software from 10X Genomics:Cellranger  
+R and R's integrated developmental environment RStudio:     
 R 4.1.3 (2022-03-10) (x64 bit)
 Rstudio v2022.7.1.554, release_name- "Spotted Wakerobin" (x64 bit)
 RTools v3.3.X
