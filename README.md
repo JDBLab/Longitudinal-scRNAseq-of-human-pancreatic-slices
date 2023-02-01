@@ -82,11 +82,10 @@ Dr. Ricardo Pastori PhD. - Diabetes Research Institute, UM  to contact please Em
 
 Acknowledgements
 -------------------
-Diabetes Research Institute Foundation (DRIF)
-Grant ID	Grant title	Affiliation	Name
-R01 DK130846	Single-cell longitudinal analysis of regeneration in human pancreatic slices	University of Miami School of Medicine	Juan Dominguez-Bendala
-R01 DK130846	Single-cell longitudinal analysis of regeneration in human pancreatic slices	University of Miami School of Medicine	RICARDO L PASTORI
-U01 DK120393	HIGH-RESOLUTION CHARACTERIZATION OF HUMAN DUCTAL PROGENITOR CELLS AND THEIR REGENERATION POTENTIAL	University of Miami School of Medicine	Juan Dominguez-Bendala
-U01 DK120393	HIGH-RESOLUTION CHARACTERIZATION OF HUMAN DUCTAL PROGENITOR CELLS AND THEIR REGENERATION POTENTIAL	University of Miami School of Medicine	RICARDO L PASTORI
+Diabetes Research Institute Foundation (DRIF) 
+R01 DK130846	Single-cell longitudinal analysis of regeneration in human pancreatic slices	University of Miami School of Medicine	Juan Dominguez-Bendala  
+R01 DK130846	Single-cell longitudinal analysis of regeneration in human pancreatic slices	University of Miami School of Medicine	RICARDO L PASTORI 
+U01 DK120393	HIGH-RESOLUTION CHARACTERIZATION OF HUMAN DUCTAL PROGENITOR CELLS AND THEIR REGENERATION POTENTIAL	University of Miami School of Medicine	Juan Dominguez-Bendala  
+U01 DK120393	HIGH-RESOLUTION CHARACTERIZATION OF HUMAN DUCTAL PROGENITOR CELLS AND THEIR REGENERATION POTENTIAL	University of Miami School of Medicine	RICARDO L PASTORI 
 
 If this was useful to you please dont forget to cite, star and fork this repository
