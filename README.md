@@ -1,30 +1,5 @@
 # Longitudinal scRNAseq of human pancreatic slices
-Table of Contents
-Summary
-Overall design
-Downloading Data files
-Data sub-structure
-FASTQ files
-Cellranger output (processed gene-counts of single cells/barcodes)
-Data analysis of integrated-dataset
-Analysis and visualization programs
-Cellranger software from 10X Genomics:
-R and R's integrated developmental environment RStudio:
-scRNAseq analysis pipeline SEURAT developed by the Satija lab:
 
-Setting up the right environment
-Computing environment
-Hardware and OS environment for running Cellranger
-Environment 1
-Environment 2
-Hardware and OS environment for running Seurat and Monocle
-Analysis was performed/replicated on each of these computing systems, and ran optimally.
-Environment 1
-Environment 2
-Environment 2
-Hardware and OS environment for running Velocyto
-Contributors
-Lead Contacts
 Summary
 This repository contains coding scripts utilized for the analysis performed in the "Single cell resolution analysis of the human pancreatic ductal progenitor cell niche" publication (Qadir/Alvarez-Cubela et. al, 2020). The purpose of providing the code here is to allow for transparency and robust data-analysis reproducibility. Most of the steps used for data analysis and visualization have been optimised for an average computing environment (for the year 2019). Some analyses however, require a high-performace computing environment (see computing environment). The methodology has already been described extensively in the manuscript. However, this analysis relies heavily on powerful scRNAseq analysis algorithms developed by the Satija lab, namely Seurat (Butler et al., 2018: Nature Biotechnology; Stuart et al., 2018: Cell) (for a complete list of dependencies and code utilized see analysis & visualization programs).
 
