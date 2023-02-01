@@ -71,8 +71,8 @@ Linux-4.14.0-115.el7a.ppc64le-ppc64le-with-glibc2.17
 
 Contributors
 ------------------
-Mayur Doke - University of Miami - to contact please Email
-Mirza Muhammad Fahd Qadir - Github - to contact please Email
+Mayur Doke - University of Miami - to contact please Email  
+Mirza Muhammad Fahd Qadir - Github - to contact please Email  
 The JDB Lab - Github - Diabetes Research Institute, UM
 
 Lead Contacts
