@@ -77,8 +77,8 @@ The JDB Lab - Github - Diabetes Research Institute, UM
 
 Lead Contacts
 ---------------------
-Dr. Juan Dominguez-Bendala PhD. - Diabetes Research Institute, UM - to contact please Email
-Dr. Ricardo Pastori PhD. - Diabetes Research Institute, UM - to contact please Email
+Dr. Juan Dominguez-Bendala PhD. - Diabetes Research Institute, UM to contact please Email-
+Dr. Ricardo Pastori PhD. - Diabetes Research Institute, UM  to contact please Email
 
 Acknowledgements
 -------------------
