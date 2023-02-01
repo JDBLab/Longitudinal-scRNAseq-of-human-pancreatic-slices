@@ -34,27 +34,12 @@ Analysis and visualization programs
 Cellranger software from 10X Genomics:
 Cellranger
 R and R's integrated developmental environment RStudio:
-R v3.5.3 (x64 bit)
-RStudio v1.2.1335 (x64 bit)
+R 4.1.3 (2022-03-10) (x64 bit)
+Rstudio v2022.7.1.554, release_name- "Spotted Wakerobin" (x64 bit)
 RTools v3.3.X
-Tutorial for R
-Tutorial for RStudio
-scRNAseq analysis pipeline SEURAT developed by the Satija lab:
-Source code for Seurat v3.0.0
-Tutorials for Seurat
-Pseudotemporal gene expression analysis using Monocle developed by the Trapnell Lab:
-Source code for Monocle v2.8.0
-Tutorial for Monocle
-3D tSNE analysis and Gene expression plotting
-Source code for plotly
-Tutorial for plotly
-Setting up the right environment
-Install R
-Install Rstudio
-You are ready to rumble in the jungle.
-Once you have installed R and RStudio, copy script from the first file in the Pancreas_ductal_scRNAseq/R_analysis_by_experiment/ folder. After this run and install all dependencies, and then load these packages allowing for analysis.
-If you need help understanding how commands are run in R use the [ctrl + enter] command or please visit here.
-If you run into problems, please open a new issue, you can do this by going to 'issues' and clicking on the 'new issue' icon. We will help you replicate our analysis! Do not fear single cell analysis!
+
+
+
 Computing environment
 Hardware and OS environment for running Cellranger
 Environment 1
